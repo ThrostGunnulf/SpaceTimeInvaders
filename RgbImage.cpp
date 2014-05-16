@@ -19,7 +19,7 @@
  */
 
 #include "RgbImage.h"
-#include "portableGL.h"
+#include "portable.h"
 
 RgbImage::RgbImage( int numRows, int numCols )
 {

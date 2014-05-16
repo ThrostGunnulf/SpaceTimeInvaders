@@ -77,12 +77,14 @@ Model::~Model()
 
 ////
 // ModelsManager
-ModelsManager::ModelsManager(std::string modelsList)
+ModelsManager::ModelsManager(std::string dir, std::string modelsList)
 {
-    std::ifstream file(modelsList.c_str());
+    std::string fileName = dir + modelsList;
+
+    std::ifstream file(fileName.c_str());
     if(!file)
     {
-        fprintf(stderr, "File %s not found!\n", modelsList.c_str());
+        fprintf(stderr, "File %s not found!\n", fileName.c_str());
         exit(-1);
     }
 
@@ -90,12 +92,12 @@ ModelsManager::ModelsManager(std::string modelsList)
     file >> token;
     for(int i=0; !file.eof(); i++)
     {
-        loadModel(token + ".obj", token, i);
+        loadModel(dir + token + ".obj", token, i);
         file >> token;
         file >> sOpt;
         file >> tOpt;
         if(texIdMap.find(token) == texIdMap.end())
-            loadTexture(token, sOpt, tOpt);
+            loadTexture(dir, token, sOpt, tOpt);
 
         modelsVector.at(i)->assignTexture(texIdMap[token]);
 
@@ -197,7 +199,7 @@ void ModelsManager::countObjFileSizes(std::ifstream& objFile, Model* count)
     objFile.seekg(0, std::ios::beg);
 }
 
-void ModelsManager::loadTexture(std::string name, std::string sOpt, std::string tOpt)
+void ModelsManager::loadTexture(std::string dir, std::string name, std::string sOpt, std::string tOpt)
 {
     GLuint texId;
     RgbImage imag;
@@ -219,7 +221,7 @@ void ModelsManager::loadTexture(std::string name, std::string sOpt, std::string 
     else
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    imag.LoadBmpFile((name + ".bmp").c_str());
+    imag.LoadBmpFile((dir + name + ".bmp").c_str());
     glTexImage2D(GL_TEXTURE_2D, 0, 3,
     imag.GetNumCols(),
         imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,

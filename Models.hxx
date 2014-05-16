@@ -10,7 +10,7 @@
 #include <iostream>
 #include <limits>
 
-#include "portableGL.h"
+#include "portable.h"
 #include "RgbImage.h"
 
 struct Model
@@ -34,7 +34,7 @@ private:
 class ModelsManager
 {
 public:
-    ModelsManager(std::string modelsList);
+    ModelsManager(std::string dir, std::string modelsList);
     ~ModelsManager();
     Model* getModel(const std::string name);
 
@@ -45,7 +45,7 @@ private:
 
     void loadModel(const std::string& objFile, const std::string& modelName, int objNum);
     void countObjFileSizes(std::ifstream& objFile, Model* count);
-    void loadTexture(std::string name, std::string sOpt, std::string tOpt);
+    void loadTexture(std::string dir, std::string name, std::string sOpt, std::string tOpt);
 };
 
 
