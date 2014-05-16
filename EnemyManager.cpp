@@ -18,7 +18,6 @@ EnemyManager::EnemyManager(ModelsManager* _mm, GLint currY, GLfloat currS) : mm(
 	}
 }
 
-
 void EnemyManager::update()
 {
 	for(int i = 0; i < ENEMYLINES; i++)
@@ -30,4 +29,3 @@ void EnemyManager::update()
 		}
 	}
 }
-

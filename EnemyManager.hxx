@@ -10,7 +10,6 @@ public:
 	void checkCollision(GLfloat x, GLfloat y);
 	void update();
 
-
 private:
 	ModelsManager* mm;
     Object*** enemyMatrix;

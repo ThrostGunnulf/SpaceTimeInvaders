@@ -50,7 +50,7 @@ void drawObjects(void)
 
 void keyOperations(void)
 {
-    if(keyState[32] && playerBullet == NULL) //SPACEBAR
+    if(keyState[' '] && playerBullet == NULL) //SPACEBAR
     {
         Model* bulletModel = modelsManager->getModel("caixa");
         playerBullet = new Object(bulletModel, player->x, player->y, player->z);
@@ -140,6 +140,8 @@ void display(void)
 
     //Swap Buffers
     glutSwapBuffers();
+
+    glutPostRedisplay();
 }
 
 void Timer(int value)
@@ -157,19 +159,23 @@ void Timer(int value)
 void keyPressEvent(unsigned char key, int x, int y)
 {
     keyState[key] = true;
+    glutPostRedisplay();
 }
 
 void keyReleaseEvent(unsigned char key, int x, int y)
 {
     keyState[key] = false;
+    glutPostRedisplay();
 }
 
 void specialKeyPressEvent(int key, int x, int y)
 {
     specialKeyState[key] = true;
+    glutPostRedisplay();
 }
 
 void specialKeyReleaseEvent(int key, int x, int y)
 {
     specialKeyState[key] = false;
+    glutPostRedisplay();
 }
