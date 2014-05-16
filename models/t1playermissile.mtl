@@ -1,0 +1,72 @@
+# Blender MTL File: 't1playermissile.blend'
+# Material Count: 7
+
+newmtl 02___Default
+Ns 13.725490
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.693000 0.693000 0.693000
+Ni 1.500000
+d 1.000000
+illum 2
+refl invader1.bmp
+
+newmtl 02___Default.006
+Ns 13.725490
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.693000 0.693000 0.693000
+Ni 1.500000
+d 1.000000
+illum 2
+refl C:\\Users\\Utente\\Documents\\VideoCopilot\\Materials\\Environment\\Town.png
+
+newmtl 02___Default.007
+Ns 13.725490
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.693000 0.693000 0.693000
+Ni 1.500000
+d 1.000000
+illum 2
+refl C:\\Users\\Utente\\Documents\\VideoCopilot\\Materials\\Environment\\Town.png
+
+newmtl 02___Default.008
+Ns 13.725490
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.693000 0.693000 0.693000
+Ni 1.500000
+d 1.000000
+illum 2
+refl C:\\Users\\Utente\\Documents\\VideoCopilot\\Materials\\Environment\\Town.png
+
+newmtl 02___Default.009
+Ns 13.725490
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.693000 0.693000 0.693000
+Ni 1.500000
+d 1.000000
+illum 2
+refl C:\\Users\\Utente\\Documents\\VideoCopilot\\Materials\\Environment\\Town.png
+
+newmtl 02___Default.010
+Ns 13.725490
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.693000 0.693000 0.693000
+Ni 1.500000
+d 1.000000
+illum 2
+refl C:\\Users\\Utente\\Documents\\VideoCopilot\\Materials\\Environment\\Town.png
+
+newmtl 02___Default.011
+Ns 13.725490
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.693000 0.693000 0.693000
+Ni 1.500000
+d 1.000000
+illum 2
+refl C:\\Users\\Utente\\Documents\\VideoCopilot\\Materials\\Environment\\Town.png
