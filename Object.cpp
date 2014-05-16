@@ -14,10 +14,10 @@ void Object::update(GLfloat delta)
 
 	translate(velX, velY, velZ);
 
-	glPushMatrix();
-		glScalef(sx, sy, sz);
+    glPushMatrix();
 		glTranslatef(x, y, z);
 		glRotatef(angle, ax, ay, az);
+        glScalef(sx, sy, sz);
 		model->draw();
     glPopMatrix();
 }

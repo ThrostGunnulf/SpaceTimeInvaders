@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <ostream>
 
 #include "RgbImage.h"
 #include "Models.hxx"
@@ -9,23 +10,52 @@
 
 #define BLACK 0.0, 0.0, 0.0, 1.0
 
+////
+// Function forward declarations
 void init(void);
 void resizeWindow(GLsizei, GLsizei);
 void display(void);
 void Timer(int);
 
-GLint fps = 100, msec = 1.0/fps;
+////
+// Global variables.
+GLint fps = 100;
+GLfloat msec = 1.0/fps;
 bool isOrthoProj = false;
 GLfloat obsP[] = {75.0, 75.0, 75.0};
+GLfloat playerHorizontalMovement = 5.0;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
 
-ModelsManager* modelsManager;
-Object* invader;
+Object* player = NULL;
+Object* playerBullet = NULL;
+ModelsManager* modelsManager = NULL;
 
 void drawObjects(void)
 {
-    invader->update(msec);
+    player->update(msec);
+    if(playerBullet)
+        playerBullet->update(msec);
+}
+
+void keyEvent(unsigned char key, int x, int y)
+{
+    if(key == 32 && playerBullet == NULL) //SPACEBAR
+    {
+        Model* bulletModel = modelsManager->getModel("caixa");
+        std::cout << player->x << ", " << player->y << ", " << player->z << std::endl;
+        playerBullet = new Object(bulletModel, player->x, player->y, player->z);
+        playerBullet->setVelocity(0, 0.5, 0);
+        playerBullet->setRotation(10, 1, 1, 1);
+    }
+}
+
+void specialKeyEvent(int key, int x, int y)
+{
+    if(key == GLUT_KEY_LEFT)
+        player->translate(-playerHorizontalMovement, 0, 0);
+    else if(key == GLUT_KEY_RIGHT)
+        player->translate(playerHorizontalMovement, 0, 0);
 }
 
 int main(int argc, char** argv)
@@ -40,8 +70,8 @@ int main(int argc, char** argv)
 
     glutDisplayFunc(display);
     glutReshapeFunc(resizeWindow);
-    //glutKeyboardFunc(keyboard);
-    //glutSpecialFunc(teclasNotAscii);
+    glutKeyboardFunc(keyEvent);
+    glutSpecialFunc(specialKeyEvent);
 
     glutTimerFunc(msec, Timer, 0);
     glutMainLoop();
@@ -61,10 +91,9 @@ void init(void)
     glCullFace(GL_BACK);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-    invader = new Object(modelsManager->getModel("caixa"), 0, 0, 0);
-    invader->setVelocity(0.1, 0.1, 0.1);
-    invader->setRotation(10, 1, 1, 1);
-    invader->setScale(5, 5, 5);
+    player = new Object(modelsManager->getModel("caixa"), 0, 0, 0);
+    //player->setVelocity(0.1, 0.1, 0.1);
+    player->setScale(5, 5, 5);
 }
 
 void resizeWindow(GLsizei w, GLsizei h)
@@ -102,6 +131,12 @@ void display(void)
 
 void Timer(int value)
 {
+    if(playerBullet && playerBullet->y > yC)
+    {
+        delete playerBullet;
+        playerBullet = NULL;
+    }
+
     glutPostRedisplay();
     glutTimerFunc(msec, Timer, 0);
 }

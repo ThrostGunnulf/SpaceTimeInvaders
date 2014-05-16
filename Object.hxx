@@ -4,8 +4,9 @@
 class Object
 {
 public:
+    GLfloat x, y, z;
     Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z);
-    ~Object();
+    ~Object() {}
 	void update(GLfloat delta);
 	void move(GLfloat dx, GLfloat dy, GLfloat dz);
 	void setRotation(GLfloat vel, GLfloat _ax, GLfloat _ay, GLfloat _az);
@@ -14,7 +15,7 @@ public:
 	void setScale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ);
 
 private:
-    GLfloat x, y, z, velX, velY, velZ, angle, dangle, ax, ay, az, sx, sy, sz;
+    GLfloat velX, velY, velZ, angle, dangle, ax, ay, az, sx, sy, sz;
     Model* model;
 
 	void normalizeAngle();
