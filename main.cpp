@@ -144,13 +144,27 @@ void display(void)
     glutPostRedisplay();
 }
 
+
+void fodasse(void)
+{
+	double a, b, c, d, e, f, g, asd, gjsf, dfgd, wdwdc, wefwegrg, rtgrgtht, rthtrhtyh, qweqwe,werwerw,retrtyry,tyutyuytu,yuiyui;
+
+	double putas[100], asdad[101000], jasd[29];
+
+}
+
 void Timer(int value)
 {
     if(playerBullet && playerBullet->y > yC)
     {
+		std::cout << "BALA FOI CO CRL\n";
         delete playerBullet;
         playerBullet = NULL;
     }
+
+	fodasse();
+	
+	//std::cout << playerBullet << "\n";
 
     glutPostRedisplay();
     glutTimerFunc(msec, Timer, 0);
@@ -158,6 +172,8 @@ void Timer(int value)
 
 void keyPressEvent(unsigned char key, int x, int y)
 {
+	if(key > 255)
+		std::cout << "FODASSE\n";
     keyState[key] = true;
     glutPostRedisplay();
 }
@@ -170,6 +186,9 @@ void keyReleaseEvent(unsigned char key, int x, int y)
 
 void specialKeyPressEvent(int key, int x, int y)
 {
+	if(key > 255)
+		std::cout << "FODASSE\n";
+
     specialKeyState[key] = true;
     glutPostRedisplay();
 }
