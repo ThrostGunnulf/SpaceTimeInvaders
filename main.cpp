@@ -16,6 +16,10 @@ void init(void);
 void resizeWindow(GLsizei, GLsizei);
 void display(void);
 void Timer(int);
+void keyPressEvent(unsigned char, int, int);
+void keyReleaseEvent(unsigned char, int, int);
+void specialKeyPressEvent(int, int, int);
+void specialKeyReleaseEvent(int, int, int);
 
 ////
 // Global variables.
@@ -23,9 +27,12 @@ GLint fps = 100;
 GLfloat msec = 1.0/fps;
 bool isOrthoProj = false;
 GLfloat obsP[] = {75.0, 75.0, 75.0};
-GLfloat playerHorizontalMovement = 5.0;
+GLfloat playerHorizontalMovement = 1.0;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
+
+bool keyState[256] = {false};
+bool specialKeyState[256] = {false};
 
 Object* player = NULL;
 Object* playerBullet = NULL;
@@ -38,23 +45,19 @@ void drawObjects(void)
         playerBullet->update(msec);
 }
 
-void keyEvent(unsigned char key, int x, int y)
+void keyOperations(void)
 {
-    if(key == 32 && playerBullet == NULL) //SPACEBAR
+    if(keyState[32] && playerBullet == NULL) //SPACEBAR
     {
         Model* bulletModel = modelsManager->getModel("caixa");
-        std::cout << player->x << ", " << player->y << ", " << player->z << std::endl;
         playerBullet = new Object(bulletModel, player->x, player->y, player->z);
-        playerBullet->setVelocity(0, 0.5, 0);
+        playerBullet->setVelocity(0, 1, 0);
         playerBullet->setRotation(10, 1, 1, 1);
     }
-}
 
-void specialKeyEvent(int key, int x, int y)
-{
-    if(key == GLUT_KEY_LEFT)
+    if(specialKeyState[GLUT_KEY_LEFT])
         player->translate(-playerHorizontalMovement, 0, 0);
-    else if(key == GLUT_KEY_RIGHT)
+    if(specialKeyState[GLUT_KEY_RIGHT])
         player->translate(playerHorizontalMovement, 0, 0);
 }
 
@@ -70,8 +73,12 @@ int main(int argc, char** argv)
 
     glutDisplayFunc(display);
     glutReshapeFunc(resizeWindow);
-    glutKeyboardFunc(keyEvent);
-    glutSpecialFunc(specialKeyEvent);
+
+    glutKeyboardFunc(keyPressEvent);
+    glutKeyboardUpFunc(keyReleaseEvent);
+
+    glutSpecialFunc(specialKeyPressEvent);
+    glutSpecialUpFunc(specialKeyReleaseEvent);
 
     glutTimerFunc(msec, Timer, 0);
     glutMainLoop();
@@ -123,6 +130,8 @@ void display(void)
     glLoadIdentity();
     gluLookAt(obsP[0], obsP[1], obsP[2], 0,0,0, 0, 1, 0);
 
+    //Update and draw stuff
+    keyOperations();
     drawObjects();
 
     //Swap Buffers
@@ -139,4 +148,24 @@ void Timer(int value)
 
     glutPostRedisplay();
     glutTimerFunc(msec, Timer, 0);
+}
+
+void keyPressEvent(unsigned char key, int x, int y)
+{
+    keyState[key] = true;
+}
+
+void keyReleaseEvent(unsigned char key, int x, int y)
+{
+    keyState[key] = false;
+}
+
+void specialKeyPressEvent(int key, int x, int y)
+{
+    specialKeyState[key] = true;
+}
+
+void specialKeyReleaseEvent(int key, int x, int y)
+{
+    specialKeyState[key] = false;
 }
