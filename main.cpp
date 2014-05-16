@@ -6,6 +6,7 @@
 #include "RgbImage.h"
 #include "Models.hxx"
 #include "Object.hxx"
+#include "EnemyManager.hxx"
 #include "portable.h"
 
 #define BLACK 0.0, 0.0, 0.0, 1.0
@@ -37,12 +38,14 @@ bool specialKeyState[256] = {false};
 Object* player = NULL;
 Object* playerBullet = NULL;
 ModelsManager* modelsManager = NULL;
+EnemyManager* enemyManager = NULL;
 
 void drawObjects(void)
 {
     player->update(msec);
     if(playerBullet)
         playerBullet->update(msec);
+	enemyManager->update();
 }
 
 void keyOperations(void)
@@ -98,6 +101,7 @@ void init(void)
     glCullFace(GL_BACK);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
+	enemyManager = new EnemyManager(modelsManager, 10, 10);
     player = new Object(modelsManager->getModel("caixa"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(5, 5, 5);

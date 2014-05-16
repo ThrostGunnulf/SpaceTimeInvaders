@@ -1,3 +1,6 @@
+#ifndef OBJECT_HXX
+#define OBJECT_HXX
+
 #include "portable.h"
 #include "Models.hxx"
 
@@ -20,3 +23,5 @@ private:
 
 	void normalizeAngle();
 };
+
+#endif
