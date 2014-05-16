@@ -2,8 +2,10 @@
 
 ////
 // Object
-Object::Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z) : model(_model), x(_x), y(_y), z(_z), velX(0), velY(0), velZ(0), angle(0), dangle(0), ax(0), ay(0), az(0), sx(1), sy(1), sz(1){}
-
+Object::Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z) : x(_x), y(_y), z(_z), velX(0), velY(0), velZ(0), angle(0), dangle(0), ax(0), ay(0), az(0), sx(1), sy(1), sz(1)
+{
+    model = _model;
+}
 
 void Object::update(GLfloat delta)
 {
@@ -17,9 +19,8 @@ void Object::update(GLfloat delta)
 		glTranslatef(x, y, z);
 		glRotatef(angle, ax, ay, az);
 		model->draw();
-	glPopMatrix();
+    glPopMatrix();
 }
-
 
 void Object::translate(GLfloat dx, GLfloat dy, GLfloat dz)
 {
@@ -43,7 +44,6 @@ void Object::setVelocity(GLfloat _velX, GLfloat _velY, GLfloat _velZ)
 	velZ = _velZ;
 }
 
-
 void Object::normalizeAngle()
 {
 	while(angle > 360)
@@ -53,11 +53,9 @@ void Object::normalizeAngle()
 		angle += 360;
 }
 
-
 void Object::setScale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ)
 {
 	sx = scaleX;
 	sy = scaleY;
 	sz = scaleZ;
 }
-

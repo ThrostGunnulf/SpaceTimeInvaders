@@ -15,7 +15,7 @@ public:
 
 private:
     GLfloat x, y, z, velX, velY, velZ, angle, dangle, ax, ay, az, sx, sy, sz;
-	Model* model;
+    Model* model;
 
 	void normalizeAngle();
 };

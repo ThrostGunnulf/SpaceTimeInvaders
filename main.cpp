@@ -7,12 +7,14 @@
 #include "Object.hxx"
 #include "portable.h"
 
-#define BLACK    0.0, 0.0, 0.0, 1.0
+#define BLACK 0.0, 0.0, 0.0, 1.0
 
 void init(void);
 void resizeWindow(GLsizei, GLsizei);
 void display(void);
+void Timer(int);
 
+GLint fps = 100, msec = 1.0/fps;
 bool isOrthoProj = false;
 GLfloat obsP[] = {75.0, 75.0, 75.0};
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
@@ -23,7 +25,7 @@ Object* invader;
 
 void drawObjects(void)
 {
-    invader->update(1);
+    invader->update(msec);
 }
 
 int main(int argc, char** argv)
@@ -41,6 +43,7 @@ int main(int argc, char** argv)
     //glutKeyboardFunc(keyboard);
     //glutSpecialFunc(teclasNotAscii);
 
+    glutTimerFunc(msec, Timer, 0);
     glutMainLoop();
 
     return 0;
@@ -51,11 +54,16 @@ void init(void)
     glClearColor(BLACK);
     glShadeModel(GL_SMOOTH);
 
-    glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
+    glCullFace(GL_BACK);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
     invader = new Object(modelsManager->getModel("caixa"), 0, 0, 0);
+    invader->setVelocity(0.1, 0.1, 0.1);
+    invader->setRotation(10, 1, 1, 1);
     invader->setScale(5, 5, 5);
 }
 
@@ -90,4 +98,10 @@ void display(void)
 
     //Swap Buffers
     glutSwapBuffers();
+}
+
+void Timer(int value)
+{
+    glutPostRedisplay();
+    glutTimerFunc(msec, Timer, 0);
 }
