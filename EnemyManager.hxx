@@ -9,7 +9,7 @@ public:
 	void move();
     void draw();
     bool reachedLimit(void);
-    bool checkCollision(Object*&);
+    int checkCollision(Object*&);
     bool checkPointInclusion(GLfloat, GLfloat, Object*);
     void updateBBoxes();
 

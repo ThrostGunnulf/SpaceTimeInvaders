@@ -1,7 +1,7 @@
 #include "EnemyManager.hxx"
 
-#define ENEMYLINES 4
-#define ENEMYCOLUMNS 10
+#define ENEMYLINES 5
+#define ENEMYCOLUMNS 11
 
 ////
 // EnemyManager
@@ -15,16 +15,16 @@ EnemyManager::EnemyManager(ModelsManager* _mm, GLint currY, GLfloat currS, GLflo
 
         for(int j=0; j < ENEMYCOLUMNS; j++)
         {
-            if(i == 0)
-                _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader1"), (j*20+dBetweenEnemies) - 100, (i*20+dBetweenEnemies) - 0, 0);
-            else if(i == 1)
-                _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader2"), (j*20+dBetweenEnemies) - 100, (i*20+dBetweenEnemies) - 0, 0);
+            if(i < 2)
+                _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader3"), j*20+dBetweenEnemies, (i*20+dBetweenEnemies) + currentY, 0);
+            else if(i < 4)
+                _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader1"), j*20+dBetweenEnemies, (i*20+dBetweenEnemies) + currentY, 0);
             else
-                _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader3"), (j*20+dBetweenEnemies) - 100, (i*20+dBetweenEnemies) - 0, 0);
+                _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader2"), j*20+dBetweenEnemies, (i*20+dBetweenEnemies) + currentY, 0);
 
 
             _enemyMatrix[ENEMYCOLUMNS*i+j]->setScale(1, 1, 1);
-            _enemyMatrix[ENEMYCOLUMNS*i+j]->setVelocity(0.5, 0, 0);
+            _enemyMatrix[ENEMYCOLUMNS*i+j]->setVelocity(currentSpeed, 0, 0);
         }
     }
 }
@@ -48,14 +48,14 @@ bool EnemyManager::reachedLimit()
 
     if(goingRight)
     {
-        limit = 100;
+        limit = 150;
         stop = -1;
         delta = -1;
         j = ENEMYCOLUMNS -1;
     }
     else
     {
-        limit = -100;
+        limit = -150;
         stop = ENEMYCOLUMNS;
         delta = 1;
         j = 0;
@@ -97,16 +97,17 @@ void EnemyManager::move()
                 GLfloat currentSpeed = enemyMatrix[i][j]->getVelX();
 
                 enemyMatrix[i][j]->setVelocity((currentSpeed+0.05)*-1, 0, 0);
-                enemyMatrix[i][j]->translate(0, 0, 0);
+                enemyMatrix[i][j]->translate(0, -10, 0);
             }
         }
     }
 }
 
 
-bool EnemyManager::checkCollision(Object*& bullet)
+int EnemyManager::checkCollision(Object*& bullet)
 {
     bool answer;
+    int points;
 
     for(int i = 0; i < ENEMYLINES; i++)
     {
@@ -150,15 +151,17 @@ bool EnemyManager::checkCollision(Object*& bullet)
 
                     //INSERT BIG EXPLOSION HERE
 
-                    std::cout << "AI JASUS ACERTASTE NUM CHULO\n";
+                    points = 10*(1 + i/2);
 
-                    return answer;
+                    std::cout << "DEBUG: Enemy hit, worth " << points << " points\n";
+
+                    return points;
                 }
             }
         }
     }
 
-    return false;
+    return 0;
 }
 
 

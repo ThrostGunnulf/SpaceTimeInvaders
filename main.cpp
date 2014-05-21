@@ -21,6 +21,7 @@ void keyPressEvent(unsigned char, int, int);
 void keyReleaseEvent(unsigned char, int, int);
 void specialKeyPressEvent(int, int, int);
 void specialKeyReleaseEvent(int, int, int);
+void drawScpre();
 
 ////
 // Global variables.
@@ -39,6 +40,33 @@ Object* player = NULL;
 Object* playerBullet = NULL;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
+
+int score = 0;
+
+
+void drawScore()
+{
+    char* scr = "Score: ";
+    char scrValue[10];
+
+    glColor3f(255, 255, 255);
+
+    glRasterPos2f(-150, 115);
+    while (*scr)
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *scr++);
+
+    sprintf(scrValue, "%d", score);
+
+    glRasterPos2f(-120, 115);
+
+    int i = 0;
+    while (scrValue[i] != '\0')
+    {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, scrValue[i]);
+        i++;
+    }
+}
+
 
 void drawObjects(void)
 {
@@ -100,7 +128,7 @@ void init(void)
     glCullFace(GL_BACK);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-    enemyManager = new EnemyManager(modelsManager, 0, 1, 20);
+    enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(1, 1, 1);
@@ -128,7 +156,6 @@ void display(void)
     else
         gluPerspective(90.0, screenWidth/(GLfloat)screenHeight, 0.01, zC);
 
-
     //View
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -137,6 +164,7 @@ void display(void)
     //Update and draw stuff
     drawObjects();
     enemyManager->draw();
+    drawScore();
 
     //Swap Buffers
     glutSwapBuffers();
@@ -155,7 +183,7 @@ void Timer(int value)
     {
         playerBullet->model->updateBBox(playerBullet->x, playerBullet->y, playerBullet->sx, playerBullet->sy);
         Object* tempBullet = playerBullet;
-        enemyManager->checkCollision(tempBullet);
+        score += enemyManager->checkCollision(tempBullet);
     }
 
     if(playerBullet != NULL && playerBullet->y > yC)
