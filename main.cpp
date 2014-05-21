@@ -27,7 +27,7 @@ void specialKeyReleaseEvent(int, int, int);
 GLint fps = 100;
 GLfloat msec = 1.0/fps;
 bool isOrthoProj = false;
-GLfloat obsP[] = {75.0, 75.0, 75.0};
+GLfloat obsP[] = {0, 50.0, 150.0};
 GLfloat playerHorizontalMovement = 0.001;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
@@ -44,17 +44,17 @@ void drawObjects(void)
 {
     player->update(msec);
     if(playerBullet)
-        playerBullet->update(msec);	
+        playerBullet->update(msec);
 }
 
 void keyOperations(void)
 {
     if(keyState[' '] && playerBullet == NULL) //SPACEBAR
     {
-        Model* bulletModel = modelsManager->getModel("caixa");
+        Model* bulletModel = modelsManager->getModel("t1playermissile");
         playerBullet = new Object(bulletModel, player->x, player->y, player->z);
         playerBullet->setVelocity(0, 1, 0);
-        playerBullet->setRotation(10, 1, 1, 1);
+        //playerBullet->setRotation(10, 0, 1, 0);
     }
 
     if(specialKeyState[GLUT_KEY_LEFT])
@@ -100,10 +100,10 @@ void init(void)
     glCullFace(GL_BACK);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-    enemyManager = new EnemyManager(modelsManager, 0, 1);
-    player = new Object(modelsManager->getModel("caixa"), 0, 0, 0);
+    enemyManager = new EnemyManager(modelsManager, 0, 1, 20);
+    player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
-    player->setScale(5, 5, 5);
+    player->setScale(1, 1, 1);
 }
 
 void resizeWindow(GLsizei w, GLsizei h)
@@ -136,7 +136,7 @@ void display(void)
 
     //Update and draw stuff
     drawObjects();
-    enemyManager->update();
+    enemyManager->draw();
 
     //Swap Buffers
     glutSwapBuffers();
@@ -147,6 +147,16 @@ void display(void)
 void Timer(int value)
 {
     keyOperations();
+
+    enemyManager->move();
+    enemyManager->updateBBoxes();
+
+    if(playerBullet != NULL)
+    {
+        playerBullet->model->updateBBox(playerBullet->x, playerBullet->y, playerBullet->sx, playerBullet->sy);
+        Object* tempBullet = playerBullet;
+        enemyManager->checkCollision(tempBullet);
+    }
 
     if(playerBullet != NULL && playerBullet->y > yC)
     {

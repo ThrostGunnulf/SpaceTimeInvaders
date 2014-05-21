@@ -53,10 +53,40 @@ void Model::draw()
     glDisable(GL_TEXTURE_2D);
 }
 
+
+void Model::drawBBox()
+{
+    glBegin(GL_QUADS);
+    {
+        glVertex3f(x1, y1, 0);
+        glVertex3f(x2, y2, 0);
+        glVertex3f(x3, y3, 0);
+        glVertex3f(x4, y4, 0);
+    }
+    glEnd();
+}
+
 void Model::assignTexture(GLuint id)
 {
     texId = id;
 }
+
+
+void Model::createBBox(GLfloat _height, GLfloat _width)
+{
+    height = _height;
+    width = _width;
+}
+
+
+void Model::updateBBox(GLfloat x, GLfloat y, GLfloat sx, GLfloat sy)
+{
+    x1 = x2 = (x - width / 2);
+    x3 = x4 = (x + width / 2);
+    y1 = y4 = (y + width / 2);
+    y2 = y3 = (y - width / 2);
+}
+
 
 Model::~Model()
 {
@@ -86,6 +116,7 @@ ModelsManager::ModelsManager(std::string dir, std::string modelsList)
         exit(-1);
     }
 
+    GLfloat height, width;
     std::string token, sOpt, tOpt;
     file >> token;
     for(int i=0; !file.eof(); i++)
@@ -98,6 +129,10 @@ ModelsManager::ModelsManager(std::string dir, std::string modelsList)
             loadTexture(dir, token, sOpt, tOpt);
 
         modelsVector.at(i)->assignTexture(texIdMap[token]);
+
+        file >> height;
+        file >> width;
+        modelsVector.at(i)->createBBox(height, width);
 
         file >> token;
     }

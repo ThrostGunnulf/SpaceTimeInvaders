@@ -20,6 +20,12 @@ void Object::update(GLfloat delta)
         glScalef(sx, sy, sz);
 		model->draw();
     glPopMatrix();
+
+    glPushMatrix();
+    glScalef(sx, sy, sz);
+    glTranslatef(0, 0, 1);
+    model->drawBBox();
+    glPopMatrix();
 }
 
 void Object::translate(GLfloat dx, GLfloat dy, GLfloat dz)
@@ -58,4 +64,9 @@ void Object::setScale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ)
 	sx = scaleX;
 	sy = scaleY;
 	sz = scaleZ;
+}
+
+GLfloat Object::getVelX()
+{
+    return velX;
 }

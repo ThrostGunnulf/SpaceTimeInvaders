@@ -17,6 +17,7 @@ struct Model
 {
     int numVertex, numNormals, numTexPoints, numFaces;
     int** faces;
+    float height, width, x1, x2, x3, x4, y1, y2, y3, y4;
     float **vertex, **normals, **texPoints;
 
     Model();
@@ -24,6 +25,9 @@ struct Model
     void allocSpace();
     void draw();
     void assignTexture(GLuint id);
+    void createBBox(GLfloat _height, GLfloat _width);
+    void updateBBox(GLfloat x, GLfloat y, GLfloat sx, GLfloat sy);
+    void drawBBox();
 
 private:
     GLuint texId;

@@ -7,7 +7,8 @@
 class Object
 {
 public:
-    GLfloat x, y, z;
+    GLfloat x, y, z, sx, sy, sz;
+    Model* model;
     Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z);
     ~Object() {}
 	void update(GLfloat delta);
@@ -16,10 +17,10 @@ public:
 	void setVelocity(GLfloat _velX, GLfloat _velY, GLfloat _velZ);
 	void translate(GLfloat dx, GLfloat dy, GLfloat dz);
 	void setScale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ);
+    GLfloat getVelX();
 
 private:
-    GLfloat velX, velY, velZ, angle, dangle, ax, ay, az, sx, sy, sz;
-    Model* model;
+    GLfloat velX, velY, velZ, angle, dangle, ax, ay, az;
 
 	void normalizeAngle();
 };
