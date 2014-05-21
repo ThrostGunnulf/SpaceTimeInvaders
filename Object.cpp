@@ -2,7 +2,7 @@
 
 ////
 // Object
-Object::Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z) : x(_x), y(_y), z(_z), velX(0), velY(0), velZ(0), angle(0), dangle(0), ax(0), ay(0), az(0), sx(1), sy(1), sz(1)
+Object::Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z) : x(_x), y(_y), z(_z), sx(1), sy(1), sz(1), velX(0), velY(0), velZ(0), angle(0), dangle(0), ax(0), ay(0), az(0)
 {
     model = _model;
 }
