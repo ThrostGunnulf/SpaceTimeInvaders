@@ -1,7 +1,5 @@
 #include "Models.hxx"
 
-extern GLuint texture[3];
-
 ////
 // Model
 Model::Model() : numVertex(0), numNormals(0), numTexPoints(0), numFaces(0), faces(NULL), vertex(NULL), normals(NULL), texPoints(NULL) {}

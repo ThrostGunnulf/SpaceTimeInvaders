@@ -14,7 +14,10 @@ EnemyManager::EnemyManager(ModelsManager* _mm, GLint currY, GLfloat currS) : mm(
 		enemyMatrix[i] = &_enemyMatrix[ENEMYCOLUMNS*i];
 		
 		for(int j=0; j < ENEMYCOLUMNS; j++)
-			_enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("caixa"), i+10, j+10, 0);
+        {
+            _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("caixa"), (j*20+20) - 50, (i*20+20) - 0, 0);
+            _enemyMatrix[ENEMYCOLUMNS*i+j]->setScale(5, 5, 5);
+        }
 	}
 }
 

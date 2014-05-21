@@ -6,8 +6,8 @@
 #include "RgbImage.h"
 #include "Models.hxx"
 #include "Object.hxx"
-#include "EnemyManager.hxx"
 #include "portable.h"
+#include "EnemyManager.hxx"
 
 #define BLACK 0.0, 0.0, 0.0, 1.0
 
@@ -28,7 +28,7 @@ GLint fps = 100;
 GLfloat msec = 1.0/fps;
 bool isOrthoProj = false;
 GLfloat obsP[] = {75.0, 75.0, 75.0};
-GLfloat playerHorizontalMovement = 1.0;
+GLfloat playerHorizontalMovement = 0.001;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
 
@@ -44,8 +44,7 @@ void drawObjects(void)
 {
     player->update(msec);
     if(playerBullet)
-        playerBullet->update(msec);
-	enemyManager->update();
+        playerBullet->update(msec);	
 }
 
 void keyOperations(void)
@@ -101,7 +100,7 @@ void init(void)
     glCullFace(GL_BACK);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-	enemyManager = new EnemyManager(modelsManager, 10, 10);
+    enemyManager = new EnemyManager(modelsManager, 0, 1);
     player = new Object(modelsManager->getModel("caixa"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(5, 5, 5);
@@ -129,42 +128,32 @@ void display(void)
     else
         gluPerspective(90.0, screenWidth/(GLfloat)screenHeight, 0.01, zC);
 
+
     //View
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(obsP[0], obsP[1], obsP[2], 0,0,0, 0, 1, 0);
 
     //Update and draw stuff
-    keyOperations();
     drawObjects();
+    enemyManager->update();
 
     //Swap Buffers
     glutSwapBuffers();
-
     glutPostRedisplay();
 }
 
 
-void fodasse(void)
-{
-	double a, b, c, d, e, f, g, asd, gjsf, dfgd, wdwdc, wefwegrg, rtgrgtht, rthtrhtyh, qweqwe,werwerw,retrtyry,tyutyuytu,yuiyui;
-
-	double putas[100], asdad[101000], jasd[29];
-
-}
-
 void Timer(int value)
 {
-    if(playerBullet && playerBullet->y > yC)
+    keyOperations();
+
+    if(playerBullet != NULL && playerBullet->y > yC)
     {
-		std::cout << "BALA FOI CO CRL\n";
+		std::cout << "DEBUG: Bullet destroyed\n";
         delete playerBullet;
         playerBullet = NULL;
     }
-
-	fodasse();
-	
-	//std::cout << playerBullet << "\n";
 
     glutPostRedisplay();
     glutTimerFunc(msec, Timer, 0);
@@ -173,28 +162,31 @@ void Timer(int value)
 void keyPressEvent(unsigned char key, int x, int y)
 {
 	if(key > 255)
-		std::cout << "FODASSE\n";
-    keyState[key] = true;
-    glutPostRedisplay();
+		std::cout << "ERROR: Invalid key event\n";
+	else
+		keyState[key] = true;
+    //glutPostRedisplay();
 }
 
 void keyReleaseEvent(unsigned char key, int x, int y)
 {
-    keyState[key] = false;
-    glutPostRedisplay();
+	if(key <= 255)
+		keyState[key] = false;
+    //glutPostRedisplay();
 }
 
 void specialKeyPressEvent(int key, int x, int y)
 {
 	if(key > 255)
-		std::cout << "FODASSE\n";
-
-    specialKeyState[key] = true;
-    glutPostRedisplay();
+		std::cout << "ERROR: Invalid key event\n";
+	else
+		specialKeyState[key] = true;
+    //glutPostRedisplay();
 }
 
 void specialKeyReleaseEvent(int key, int x, int y)
 {
-    specialKeyState[key] = false;
-    glutPostRedisplay();
+	if(key <= 255)
+		specialKeyState[key] = false;
+    //glutPostRedisplay();
 }
