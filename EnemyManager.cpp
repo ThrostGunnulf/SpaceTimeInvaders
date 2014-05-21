@@ -112,11 +112,13 @@ bool EnemyManager::checkCollision(Object*& bullet)
     {
         for(int j = 0; j < ENEMYCOLUMNS; j++)
         {
+            if(enemyMatrix[i][j] == NULL)
+                continue;
+
+            enemyMatrix[i][j]->model->updateBBox(enemyMatrix[i][j]->x, enemyMatrix[i][j]->y, enemyMatrix[i][j]->sx, enemyMatrix[i][j]->sy);
+
             for(int l = 0; l < 4; l++)
             {
-                if(enemyMatrix[i][j] == NULL)
-                    break;
-
                 switch(l)
                 {
                 case 0:
@@ -174,16 +176,12 @@ bool EnemyManager::checkPointInclusion(GLfloat bulletX, GLfloat bulletY, Object*
 
 void EnemyManager::updateBBoxes()
 {
-    std::cout << "INICIO\n";
     for(int i = 0; i < ENEMYLINES; i++)
     {
         for(int j = 0; j < ENEMYCOLUMNS; j++)
         {
             if(enemyMatrix[i][j] != NULL)
-            {
                 enemyMatrix[i][j]->model->updateBBox(enemyMatrix[i][j]->x, enemyMatrix[i][j]->y, enemyMatrix[i][j]->sx, enemyMatrix[i][j]->sy);
-                printf("i:%d, j:%d, x1:%f, y1:%f\n", i, j, enemyMatrix[i][j]->model->x1, enemyMatrix[i][j]->model->y1);
-            }
         }
     }
 }

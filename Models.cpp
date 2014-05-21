@@ -54,8 +54,10 @@ void Model::draw()
 }
 
 
-void Model::drawBBox()
+void Model::drawBBox(GLfloat _x, GLfloat _y, GLfloat _sx, GLfloat _sy)
 {
+    updateBBox(_x, _y, _sx, _sy);
+
     glBegin(GL_QUADS);
     {
         glVertex3f(x1, y1, 0);

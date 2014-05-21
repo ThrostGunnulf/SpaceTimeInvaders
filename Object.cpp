@@ -24,7 +24,7 @@ void Object::update(GLfloat delta)
     glPushMatrix();
     glScalef(sx, sy, sz);
     glTranslatef(0, 0, 1);
-    model->drawBBox();
+    //model->drawBBox(x, y, sx, sy); //Uncomment this line to display bounding boxes
     glPopMatrix();
 }
 

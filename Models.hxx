@@ -27,7 +27,7 @@ struct Model
     void assignTexture(GLuint id);
     void createBBox(GLfloat _height, GLfloat _width);
     void updateBBox(GLfloat x, GLfloat y, GLfloat sx, GLfloat sy);
-    void drawBBox();
+    void drawBBox(GLfloat _x, GLfloat _y, GLfloat _sx, GLfloat _sy);
 
 private:
     GLuint texId;
