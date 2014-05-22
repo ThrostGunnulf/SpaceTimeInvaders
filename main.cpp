@@ -31,7 +31,7 @@ GLint fps = 60;
 GLfloat msec = 1.0/fps;
 bool isOrthoProj = false;
 GLfloat obsP[] = {0.0, 50.0, 200.0};
-GLfloat playerHorizontalMovement = 0.01;
+GLfloat playerHorizontalMovement = 2.0;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
 
@@ -69,13 +69,17 @@ void keyOperations(void)
         Model* bulletModel = modelsManager->getModel("t1playermissile");
         playerBullet = new Object(bulletModel, player->x, player->y, player->z);
         playerBullet->setVelocity(0, 1, 0);
-        //playerBullet->setRotation(10, 0, 1, 0);
+        playerBullet->setRotation(10, 0, 1, 0);
     }
 
     if(specialKeyState[GLUT_KEY_LEFT])
-        player->translate(-playerHorizontalMovement, 0, 0);
-    if(specialKeyState[GLUT_KEY_RIGHT])
-        player->translate(playerHorizontalMovement, 0, 0);
+        player->setVelocity(-playerHorizontalMovement, 0, 0);
+    else if(specialKeyState[GLUT_KEY_RIGHT])
+        player->setVelocity(playerHorizontalMovement, 0, 0);
+
+    if((!specialKeyState[GLUT_KEY_LEFT] && !specialKeyState[GLUT_KEY_RIGHT]) ||
+            (specialKeyState[GLUT_KEY_LEFT] && specialKeyState[GLUT_KEY_RIGHT]))
+        player->setVelocity(0, 0, 0);
 }
 
 void destroyBullet()
