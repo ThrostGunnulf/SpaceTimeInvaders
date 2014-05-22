@@ -111,6 +111,46 @@ void destroyBullet()
     playerBullet = NULL;
 }
 
+void Timer(int value)
+{
+    if(gameLive)
+    {
+        keyOperations();
+
+        enemyManager->move();
+        enemyManager->updateBBoxes();
+
+        if(playerBullet != NULL)
+        {
+            playerBullet->model->updateBBox(playerBullet->x, playerBullet->y, playerBullet->sx, playerBullet->sy);
+            Object* tempBullet = playerBullet;
+            score += enemyManager->checkCollision(tempBullet);
+        }
+
+        if(playerBullet != NULL && playerBullet->y > yC)
+            destroyBullet();
+
+        if(gameLive && enemyManager->checkGameover())
+            gameLive = false;
+    }
+
+    if(!gameLive && keyState[' '])
+    {
+        gameLive = true;
+        if(playerBullet != NULL)
+            playerBullet = NULL;
+
+        enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
+        player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
+        player->setScale(1, 1, 1);
+        score = 0;
+    }
+
+
+    glutPostRedisplay();
+    glutTimerFunc(msec, Timer, 0);
+}
+
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
@@ -158,22 +198,6 @@ void init(void)
     player->setScale(1, 1, 1);
 }
 
-void resizeWindow(GLsizei w, GLsizei h)
-{
-    screenWidth = w;
-    screenHeight = h;
-
-    glutPostRedisplay();
-}
-
-void destroyObjects()
-{
-    delete player;
-    delete playerBullet;
-    delete modelsManager;
-    delete enemyManager;
-}
-
 void display(void)
 {
     //Clear buffer
@@ -209,45 +233,20 @@ void display(void)
     glutPostRedisplay();
 }
 
-
-void Timer(int value)
+void resizeWindow(GLsizei w, GLsizei h)
 {
-    if(gameLive)
-    {
-        keyOperations();
-
-        enemyManager->move();
-        enemyManager->updateBBoxes();
-
-        if(playerBullet != NULL)
-        {
-            playerBullet->model->updateBBox(playerBullet->x, playerBullet->y, playerBullet->sx, playerBullet->sy);
-            Object* tempBullet = playerBullet;
-            score += enemyManager->checkCollision(tempBullet);
-        }
-
-        if(playerBullet != NULL && playerBullet->y > yC)
-            destroyBullet();
-
-        if(gameLive && enemyManager->checkGameover())
-            gameLive = false;
-    }
-
-    if(!gameLive && keyState[' '])
-    {
-        gameLive = true;
-        if(playerBullet != NULL)
-            playerBullet = NULL;
-
-        enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
-        player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
-        player->setScale(1, 1, 1);
-        score = 0;
-    }
-
+    screenWidth = w;
+    screenHeight = h;
 
     glutPostRedisplay();
-    glutTimerFunc(msec, Timer, 0);
+}
+
+void destroyObjects()
+{
+    delete player;
+    delete playerBullet;
+    delete modelsManager;
+    delete enemyManager;
 }
 
 void keyPressEvent(unsigned char key, int x, int y)
