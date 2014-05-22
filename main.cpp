@@ -10,6 +10,7 @@
 #include "portable.h"
 #include "EnemyManager.hxx"
 
+#define ZOOM_SPEED 1.2
 #define CAMERA_ROTATION_SPEED 100.0
 
 #define BLACK 0.0, 0.0, 0.0, 1.0
@@ -30,6 +31,7 @@ void mouseClickEvent(int, int, int, int);
 void drawScore();
 void destroyBullet();
 void destroyObjects();
+void updateObsP();
 
 ////
 // Global variables.
@@ -135,7 +137,7 @@ void Timer(int value)
             score += enemyManager->checkCollision(tempBullet);
         }
 
-        if(playerBullet != NULL && playerBullet->y > yC)
+        if(playerBullet != NULL && playerBullet->y > 1.2*yC)
             destroyBullet();
 
         if(gameLive && enemyManager->checkGameover())
@@ -192,7 +194,6 @@ int main(int argc, char** argv)
 void init(void)
 {
     setObsPToDefault();
-    r = obsP[2];
 
     glClearColor(BLACK);
     glShadeModel(GL_SMOOTH);
@@ -245,13 +246,6 @@ void display(void)
     //Swap Buffers
     glutSwapBuffers();
     glutPostRedisplay();
-}
-
-void setObsPToDefault()
-{
-    obsP[0] = defaultObsP[0];
-    obsP[1] = defaultObsP[1];
-    obsP[2] = defaultObsP[2];
 }
 
 void destroyObjects()
@@ -314,9 +308,7 @@ void mouseDragEvent(int x, int y)
         angleX0Z += dX / CAMERA_ROTATION_SPEED;
         angleX0Y += dY / CAMERA_ROTATION_SPEED;
 
-        obsP[0] = r * sin(angleX0Z);
-        obsP[1] = r * sin(angleX0Y);
-        obsP[2] = r * cos(angleX0Z) * cos(angleX0Y);
+        updateObsP();
     }
 
     prevX = x;
@@ -337,7 +329,39 @@ void mouseClickEvent(int button, int state, int x, int y)
         else if(state == GLUT_UP)
             rightButtonIsPressed = false;
     }
-
     else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
         setObsPToDefault();
+    else if(button == 3) //Scroll wheel forwards
+    {
+        if(state == GLUT_UP)
+            return;
+
+        r /= ZOOM_SPEED;
+        updateObsP();
+    }
+    else if(button == 4) //Scroll wheel backwards
+    {
+        if(state == GLUT_UP)
+            return;
+
+        r *= ZOOM_SPEED;
+        updateObsP();
+    }
+}
+
+void updateObsP()
+{
+    obsP[0] = r * sin(angleX0Z);
+    obsP[1] = r * sin(angleX0Y);
+    obsP[2] = r * cos(angleX0Z) * cos(angleX0Y);
+}
+
+void setObsPToDefault()
+{
+    obsP[0] = defaultObsP[0];
+    obsP[1] = defaultObsP[1];
+    obsP[2] = defaultObsP[2];
+
+    r = obsP[2];
+    angleX0Z = angleX0Y = 0;
 }
