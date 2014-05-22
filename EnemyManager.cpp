@@ -188,3 +188,23 @@ void EnemyManager::updateBBoxes()
         }
     }
 }
+
+
+bool EnemyManager::checkGameover()
+{
+    for(int i = ENEMYLINES - 1; i >= 0; i--)
+    {
+        for(int j = 0; j < ENEMYCOLUMNS; j++)
+        {
+            if(enemyMatrix[i][j] != NULL)
+            {
+                if(enemyMatrix[i][j]->y <= 20)
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+

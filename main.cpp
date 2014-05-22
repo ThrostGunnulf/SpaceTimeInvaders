@@ -34,6 +34,7 @@ GLfloat obsP[] = {0.0, 50.0, 200.0};
 GLfloat playerHorizontalMovement = 2.0;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
+bool gameLive = true;
 
 bool keyState[256] = {false};
 bool specialKeyState[256] = {false};
@@ -60,6 +61,26 @@ void drawObjects(void)
     player->update(msec);
     if(playerBullet)
         playerBullet->update(msec);
+}
+
+void drawGameover()
+{
+    char gameoverStr[100], *aux = gameoverStr;
+
+    sprintf(gameoverStr, "      GAME OVER!");
+
+    glColor3f(255, 255, 255);
+
+    glRasterPos2f(-25, 0);
+    while (*aux)
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
+
+    sprintf(gameoverStr, "(hit Space to retry)");
+    aux = gameoverStr;
+    glRasterPos2f(-25, -15);
+    while (*aux)
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
+
 }
 
 void keyOperations(void)
@@ -160,9 +181,15 @@ void display(void)
     gluLookAt(obsP[0], obsP[1], obsP[2], 0,0,0, 0, 1, 0);
 
     //Update and draw stuff
-    drawObjects();
-    enemyManager->draw();
+    if(gameLive)
+    {
+        drawObjects();
+        enemyManager->draw();
+    }
     drawScore();
+
+    if(!gameLive)
+        drawGameover();
 
     //Swap Buffers
     glutSwapBuffers();
@@ -172,20 +199,39 @@ void display(void)
 
 void Timer(int value)
 {
-    keyOperations();
-
-    enemyManager->move();
-    enemyManager->updateBBoxes();
-
-    if(playerBullet != NULL)
+    if(gameLive)
     {
-        playerBullet->model->updateBBox(playerBullet->x, playerBullet->y, playerBullet->sx, playerBullet->sy);
-        Object* tempBullet = playerBullet;
-        score += enemyManager->checkCollision(tempBullet);
+        keyOperations();
+
+        enemyManager->move();
+        enemyManager->updateBBoxes();
+
+        if(playerBullet != NULL)
+        {
+            playerBullet->model->updateBBox(playerBullet->x, playerBullet->y, playerBullet->sx, playerBullet->sy);
+            Object* tempBullet = playerBullet;
+            score += enemyManager->checkCollision(tempBullet);
+        }
+
+        if(playerBullet != NULL && playerBullet->y > yC)
+            destroyBullet();
+
+        if(gameLive && enemyManager->checkGameover())
+            gameLive = false;
     }
 
-    if(playerBullet != NULL && playerBullet->y > yC)
-        destroyBullet();
+    if(!gameLive && keyState[' '])
+    {
+        gameLive = true;
+        if(playerBullet != NULL)
+            playerBullet = NULL;
+
+        enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
+        player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
+        player->setScale(1, 1, 1);
+        score = 0;
+    }
+
 
     glutPostRedisplay();
     glutTimerFunc(msec, Timer, 0);
@@ -193,32 +239,32 @@ void Timer(int value)
 
 void keyPressEvent(unsigned char key, int x, int y)
 {
-	if(key > 255)
-		std::cout << "ERROR: Invalid key event\n";
-	else
-		keyState[key] = true;
+    if(key > 255)
+        std::cout << "ERROR: Invalid key event\n";
+    else
+        keyState[key] = true;
     //glutPostRedisplay();
 }
 
 void keyReleaseEvent(unsigned char key, int x, int y)
 {
-	if(key <= 255)
-		keyState[key] = false;
+    if(key <= 255)
+        keyState[key] = false;
     //glutPostRedisplay();
 }
 
 void specialKeyPressEvent(int key, int x, int y)
 {
-	if(key > 255)
-		std::cout << "ERROR: Invalid key event\n";
-	else
-		specialKeyState[key] = true;
+    if(key > 255)
+        std::cout << "ERROR: Invalid key event\n";
+    else
+        specialKeyState[key] = true;
     //glutPostRedisplay();
 }
 
 void specialKeyReleaseEvent(int key, int x, int y)
 {
-	if(key <= 255)
-		specialKeyState[key] = false;
+    if(key <= 255)
+        specialKeyState[key] = false;
     //glutPostRedisplay();
 }

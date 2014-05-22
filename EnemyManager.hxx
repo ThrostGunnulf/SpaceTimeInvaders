@@ -13,6 +13,7 @@ public:
     int checkCollision(Object*&);
     bool checkPointInclusion(GLfloat, GLfloat, Object*);
     void updateBBoxes();
+    bool checkGameover();
 
 private:
 	ModelsManager* mm;
