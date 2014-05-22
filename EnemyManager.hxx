@@ -1,5 +1,6 @@
 #include "portable.h"
 #include "Object.hxx"
+#include "main.h"
 
 class EnemyManager
 {

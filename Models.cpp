@@ -83,10 +83,10 @@ void Model::createBBox(GLfloat _height, GLfloat _width)
 
 void Model::updateBBox(GLfloat x, GLfloat y, GLfloat sx, GLfloat sy)
 {
-    x1 = x2 = (x - width / 2);
-    x3 = x4 = (x + width / 2);
-    y1 = y4 = (y + width / 2);
-    y2 = y3 = (y - width / 2);
+    x1 = x2 = x - (width / 2);
+    x3 = x4 = x + (width / 2);
+    y1 = y4 = y + height;
+    y2 = y3 = y;
 }
 
 
@@ -132,8 +132,8 @@ ModelsManager::ModelsManager(std::string dir, std::string modelsList)
 
         modelsVector.at(i)->assignTexture(texIdMap[token]);
 
-        file >> height;
         file >> width;
+        file >> height;
         modelsVector.at(i)->createBBox(height, width);
 
         file >> token;

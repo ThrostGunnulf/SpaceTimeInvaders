@@ -146,7 +146,7 @@ int EnemyManager::checkCollision(Object*& bullet)
 
                 if(answer)
                 {
-                    bullet = NULL;
+                    destroyBullet();
                     enemyMatrix[i][j] = NULL;
 
                     //INSERT BIG EXPLOSION HERE

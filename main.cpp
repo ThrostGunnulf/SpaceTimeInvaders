@@ -21,15 +21,17 @@ void keyPressEvent(unsigned char, int, int);
 void keyReleaseEvent(unsigned char, int, int);
 void specialKeyPressEvent(int, int, int);
 void specialKeyReleaseEvent(int, int, int);
-void drawScpre();
+void drawScore();
+void destroyBullet();
 
 ////
 // Global variables.
-GLint fps = 100;
+int score = 0;
+GLint fps = 60;
 GLfloat msec = 1.0/fps;
 bool isOrthoProj = false;
-GLfloat obsP[] = {0, 50.0, 150.0};
-GLfloat playerHorizontalMovement = 0.001;
+GLfloat obsP[] = {0.0, 50.0, 200.0};
+GLfloat playerHorizontalMovement = 0.01;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
 
@@ -41,32 +43,17 @@ Object* playerBullet = NULL;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
 
-int score = 0;
-
-
 void drawScore()
 {
-    char* scr = "Score: ";
-    char scrValue[10];
+    char scr[20], *aux=scr;
+    sprintf(scr, "Score: %d", score);
 
     glColor3f(255, 255, 255);
 
     glRasterPos2f(-150, 115);
-    while (*scr)
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *scr++);
-
-    sprintf(scrValue, "%d", score);
-
-    glRasterPos2f(-120, 115);
-
-    int i = 0;
-    while (scrValue[i] != '\0')
-    {
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, scrValue[i]);
-        i++;
-    }
+    while (*aux)
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
 }
-
 
 void drawObjects(void)
 {
@@ -89,6 +76,13 @@ void keyOperations(void)
         player->translate(-playerHorizontalMovement, 0, 0);
     if(specialKeyState[GLUT_KEY_RIGHT])
         player->translate(playerHorizontalMovement, 0, 0);
+}
+
+void destroyBullet()
+{
+    std::cout << "DEBUG: Bullet destroyed\n";
+    delete playerBullet;
+    playerBullet = NULL;
 }
 
 int main(int argc, char** argv)
@@ -154,7 +148,7 @@ void display(void)
     if(isOrthoProj)
         glOrtho(-xC, xC, -yC, yC, -zC, zC);
     else
-        gluPerspective(90.0, screenWidth/(GLfloat)screenHeight, 0.01, zC);
+        gluPerspective(90.0, screenWidth/(GLfloat)screenHeight, 0.01, 10*zC);
 
     //View
     glMatrixMode(GL_MODELVIEW);
@@ -187,11 +181,7 @@ void Timer(int value)
     }
 
     if(playerBullet != NULL && playerBullet->y > yC)
-    {
-		std::cout << "DEBUG: Bullet destroyed\n";
-        delete playerBullet;
-        playerBullet = NULL;
-    }
+        destroyBullet();
 
     glutPostRedisplay();
     glutTimerFunc(msec, Timer, 0);

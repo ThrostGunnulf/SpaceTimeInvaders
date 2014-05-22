@@ -21,11 +21,12 @@ void Object::update(GLfloat delta)
 		model->draw();
     glPopMatrix();
 
-    glPushMatrix();
+    //Uncomment this section to display bounding boxes
+    /*glPushMatrix();
     glScalef(sx, sy, sz);
     glTranslatef(0, 0, 1);
-    //model->drawBBox(x, y, sx, sy); //Uncomment this line to display bounding boxes
-    glPopMatrix();
+    model->drawBBox(x, y, sx, sy);
+    glPopMatrix();*/
 }
 
 void Object::translate(GLfloat dx, GLfloat dy, GLfloat dz)
