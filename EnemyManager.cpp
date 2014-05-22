@@ -23,7 +23,7 @@ EnemyManager::EnemyManager(ModelsManager* _mm, GLint currY, GLfloat currS, GLflo
                 _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader2"), j*20+dBetweenEnemies, (i*20+dBetweenEnemies) + currentY, 0);
 
 
-            _enemyMatrix[ENEMYCOLUMNS*i+j]->setScale(1, 1, 1);
+            _enemyMatrix[ENEMYCOLUMNS*i+j]->setScale(1, 1, 10);
             _enemyMatrix[ENEMYCOLUMNS*i+j]->setVelocity(currentSpeed, 0, 0);
         }
     }

@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 #include <string>
 #include <ostream>
 
@@ -9,6 +10,8 @@
 #include "portable.h"
 #include "EnemyManager.hxx"
 
+#define CAMERA_ROTATION_SPEED 100.0
+
 #define BLACK 0.0, 0.0, 0.0, 1.0
 
 ////
@@ -17,21 +20,26 @@ void init(void);
 void resizeWindow(GLsizei, GLsizei);
 void display(void);
 void Timer(int);
+void setObsPToDefault();
 void keyPressEvent(unsigned char, int, int);
 void keyReleaseEvent(unsigned char, int, int);
 void specialKeyPressEvent(int, int, int);
 void specialKeyReleaseEvent(int, int, int);
+void mouseDragEvent(int, int);
+void mouseClickEvent(int, int, int, int);
 void drawScore();
 void destroyBullet();
 void destroyObjects();
 
 ////
 // Global variables.
+GLfloat r;
 int score = 0;
 GLint fps = 60;
 GLfloat msec = 1.0/fps;
 bool isOrthoProj = false;
-GLfloat obsP[] = {0.0, 50.0, 200.0};
+GLfloat obsP[] = {0.0, 0.0, 0.0};
+GLfloat defaultObsP[] = {0.0, 50.0, 200.0};
 GLfloat playerHorizontalMovement = 2.0;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
@@ -170,6 +178,9 @@ int main(int argc, char** argv)
     glutSpecialFunc(specialKeyPressEvent);
     glutSpecialUpFunc(specialKeyReleaseEvent);
 
+    glutMouseFunc(mouseClickEvent);
+    glutMotionFunc(mouseDragEvent);
+
     glutTimerFunc(msec, Timer, 0);
     glutMainLoop();
 
@@ -180,6 +191,9 @@ int main(int argc, char** argv)
 
 void init(void)
 {
+    setObsPToDefault();
+    r = obsP[2];
+
     glClearColor(BLACK);
     glShadeModel(GL_SMOOTH);
 
@@ -233,12 +247,11 @@ void display(void)
     glutPostRedisplay();
 }
 
-void resizeWindow(GLsizei w, GLsizei h)
+void setObsPToDefault()
 {
-    screenWidth = w;
-    screenHeight = h;
-
-    glutPostRedisplay();
+    obsP[0] = defaultObsP[0];
+    obsP[1] = defaultObsP[1];
+    obsP[2] = defaultObsP[2];
 }
 
 void destroyObjects()
@@ -249,20 +262,25 @@ void destroyObjects()
     delete enemyManager;
 }
 
+
+////
+// GLUT input events handlers
+void resizeWindow(GLsizei w, GLsizei h)
+{
+    screenWidth = w;
+    screenHeight = h;
+
+    glutPostRedisplay();
+}
+
 void keyPressEvent(unsigned char key, int x, int y)
 {
-    if(key > 255)
-        std::cout << "ERROR: Invalid key event\n";
-    else
-        keyState[key] = true;
-    //glutPostRedisplay();
+    keyState[key] = true;
 }
 
 void keyReleaseEvent(unsigned char key, int x, int y)
 {
-    if(key <= 255)
-        keyState[key] = false;
-    //glutPostRedisplay();
+    keyState[key] = false;
 }
 
 void specialKeyPressEvent(int key, int x, int y)
@@ -271,12 +289,55 @@ void specialKeyPressEvent(int key, int x, int y)
         std::cout << "ERROR: Invalid key event\n";
     else
         specialKeyState[key] = true;
-    //glutPostRedisplay();
 }
 
 void specialKeyReleaseEvent(int key, int x, int y)
 {
     if(key <= 255)
         specialKeyState[key] = false;
-    //glutPostRedisplay();
+}
+
+bool rightButtonIsPressed = false;
+int prevX = -1, prevY = -1;
+GLfloat angleX0Z = 0, angleX0Y = 0;
+void mouseDragEvent(int x, int y)
+{
+    if(!rightButtonIsPressed)
+        return;
+
+    if(prevX != -1)
+    {
+        int dX, dY;
+        dX = x - prevX;
+        dY = y - prevY;
+
+        angleX0Z += dX / CAMERA_ROTATION_SPEED;
+        angleX0Y += dY / CAMERA_ROTATION_SPEED;
+
+        obsP[0] = r * sin(angleX0Z);
+        obsP[1] = r * sin(angleX0Y);
+        obsP[2] = r * cos(angleX0Z) * cos(angleX0Y);
+    }
+
+    prevX = x;
+    prevY = y;
+}
+
+void mouseClickEvent(int button, int state, int x, int y)
+{
+    if(button == GLUT_LEFT_BUTTON)
+    {
+        if(state == GLUT_DOWN)
+        {
+            prevX = x;
+            prevY = y;
+
+            rightButtonIsPressed = true;
+        }
+        else if(state == GLUT_UP)
+            rightButtonIsPressed = false;
+    }
+
+    else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+        setObsPToDefault();
 }
