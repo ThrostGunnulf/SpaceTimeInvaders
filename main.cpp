@@ -23,6 +23,7 @@ void specialKeyPressEvent(int, int, int);
 void specialKeyReleaseEvent(int, int, int);
 void drawScore();
 void destroyBullet();
+void destroyObjects();
 
 ////
 // Global variables.
@@ -132,6 +133,8 @@ int main(int argc, char** argv)
     glutTimerFunc(msec, Timer, 0);
     glutMainLoop();
 
+    destroyObjects();
+
     return 0;
 }
 
@@ -146,6 +149,8 @@ void init(void)
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
 
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
     enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
@@ -159,6 +164,14 @@ void resizeWindow(GLsizei w, GLsizei h)
     screenHeight = h;
 
     glutPostRedisplay();
+}
+
+void destroyObjects()
+{
+    delete player;
+    delete playerBullet;
+    delete modelsManager;
+    delete enemyManager;
 }
 
 void display(void)

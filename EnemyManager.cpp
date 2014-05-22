@@ -29,6 +29,12 @@ EnemyManager::EnemyManager(ModelsManager* _mm, GLint currY, GLfloat currS, GLflo
     }
 }
 
+EnemyManager::~EnemyManager()
+{
+    delete enemyMatrix;
+    delete _enemyMatrix;
+}
+
 void EnemyManager::draw()
 {
     for(int i = 0; i < ENEMYLINES; i++)
