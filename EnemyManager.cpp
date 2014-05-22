@@ -122,7 +122,7 @@ int EnemyManager::checkCollision(Object*& bullet)
             if(enemyMatrix[i][j] == NULL)
                 continue;
 
-            enemyMatrix[i][j]->model->updateBBox(enemyMatrix[i][j]->x, enemyMatrix[i][j]->y, enemyMatrix[i][j]->sx, enemyMatrix[i][j]->sy);
+            enemyMatrix[i][j]->model->updateBBox(enemyMatrix[i][j]->x, enemyMatrix[i][j]->y);
 
             for(int l = 0; l < 4; l++)
             {
@@ -190,7 +190,7 @@ void EnemyManager::updateBBoxes()
         for(int j = 0; j < ENEMYCOLUMNS; j++)
         {
             if(enemyMatrix[i][j] != NULL)
-                enemyMatrix[i][j]->model->updateBBox(enemyMatrix[i][j]->x, enemyMatrix[i][j]->y, enemyMatrix[i][j]->sx, enemyMatrix[i][j]->sy);
+                enemyMatrix[i][j]->model->updateBBox(enemyMatrix[i][j]->x, enemyMatrix[i][j]->y);
         }
     }
 }

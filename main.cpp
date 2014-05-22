@@ -52,6 +52,7 @@ bool specialKeyState[256] = {false};
 
 Object* player = NULL;
 Object* playerBullet = NULL;
+Object* planet = NULL;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
 
@@ -72,6 +73,8 @@ void drawObjects(void)
     player->update(msec);
     if(playerBullet)
         playerBullet->update(msec);
+
+    planet->update(msec);
 }
 
 void drawGameover()
@@ -132,7 +135,7 @@ void Timer(int value)
 
         if(playerBullet != NULL)
         {
-            playerBullet->model->updateBBox(playerBullet->x, playerBullet->y, playerBullet->sx, playerBullet->sy);
+            playerBullet->model->updateBBox(playerBullet->x, playerBullet->y);
             Object* tempBullet = playerBullet;
             score += enemyManager->checkCollision(tempBullet);
         }
@@ -211,6 +214,9 @@ void init(void)
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(1, 1, 1);
+    planet = new Object(modelsManager->getModel("planet"), 275, -200, -575);
+    planet->setScale(50, 50, 50);
+    planet->setRotation(0.05, 0, 1, 0);
 }
 
 void display(void)

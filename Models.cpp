@@ -56,7 +56,7 @@ void Model::draw()
 
 void Model::drawBBox(GLfloat _x, GLfloat _y, GLfloat _sx, GLfloat _sy)
 {
-    updateBBox(_x, _y, _sx, _sy);
+    updateBBox(_x, _y);
 
     glBegin(GL_QUADS);
     {
@@ -81,7 +81,7 @@ void Model::createBBox(GLfloat _height, GLfloat _width)
 }
 
 
-void Model::updateBBox(GLfloat x, GLfloat y, GLfloat sx, GLfloat sy)
+void Model::updateBBox(GLfloat x, GLfloat y)
 {
     x1 = x2 = x - (width / 2);
     x3 = x4 = x + (width / 2);
