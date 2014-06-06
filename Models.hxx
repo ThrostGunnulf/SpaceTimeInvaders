@@ -13,6 +13,17 @@
 #include "portable.h"
 #include "RgbImage.h"
 
+struct Material
+{
+    GLfloat Ka[3], Kd[3], Ks[3], Ns;
+
+    void setKa(GLfloat r, GLfloat g, GLfloat b);
+    void setKd(GLfloat r, GLfloat g, GLfloat b);
+    void setKs(GLfloat r, GLfloat g, GLfloat b);
+    void setNs(GLfloat ns);
+};
+
+
 struct Model
 {
     int numVertex, numNormals, numTexPoints, numFaces;
@@ -31,6 +42,7 @@ struct Model
 
 private:
     GLuint texId;
+    GLuint matId;
     int *_faces;
     float *_vertex, *_normals, *_texPoints;
 };
@@ -46,10 +58,12 @@ private:
     std::vector<Model*> modelsVector;
     std::map<std::string, int> modelIndexMap;
     std::map<std::string, GLuint> texIdMap;
+    std::map<std::string, Material> materialMap;
 
     void loadModel(const std::string& objFile, const std::string& modelName, int objNum);
     void countObjFileSizes(std::ifstream& objFile, Model* count);
     void loadTexture(std::string dir, std::string name, std::string sOpt, std::string tOpt);
+    void loadMaterial(std::string dir, std::string file);
 };
 
 

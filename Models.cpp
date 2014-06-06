@@ -106,6 +106,35 @@ Model::~Model()
 }
 
 ////
+// Material
+void Material::setKa(GLfloat r, GLfloat g, GLfloat b)
+{
+    Ka[0] = r;
+    Ka[1] = g;
+    Ka[2] = b;
+}
+
+void Material::setKd(GLfloat r, GLfloat g, GLfloat b)
+{
+    Kd[0] = r;
+    Kd[1] = g;
+    Kd[2] = b;
+}
+
+void Material::setKs(GLfloat r, GLfloat g, GLfloat b)
+{
+    Ks[0] = r;
+    Ks[1] = g;
+    Ks[2] = b;
+}
+
+void Material::setNs(GLfloat ns)
+{
+    Ns = ns;
+}
+
+
+////
 // ModelsManager
 ModelsManager::ModelsManager(std::string dir, std::string modelsList)
 {
@@ -137,6 +166,10 @@ ModelsManager::ModelsManager(std::string dir, std::string modelsList)
         modelsVector.at(i)->createBBox(height, width);
 
         file >> token;
+        if(materialMap.find(token) == materialMap.end())
+            loadMaterial(dir, token);
+
+        file >> token;
     }
 
     file.close();
@@ -148,6 +181,55 @@ ModelsManager::~ModelsManager()
     modelIndexMap.clear();
     texIdMap.clear();
 }
+
+void ModelsManager::loadMaterial(std::string dir, std::string matName)
+{
+    Material material;
+    std::string fileName = dir + matName + ".mtl";
+    std::string token;
+
+    std::ifstream file(fileName.c_str());
+    if(!file)
+    {
+        fprintf(stderr, "File %s not found!\n", fileName.c_str());
+        exit(-1);
+    }
+
+    for(int i=0; !file.eof(); i++)
+    {
+        GLfloat Ka[3], Kd[3], Ks[3], Ns;
+
+        file >> token;
+
+        if(token.compare("Ka") == 0)
+        {
+            file >> Ka[0] >> Ka[1] >> Ka[2];
+            material.setKa(Ka[0], Ka[1], Ka[2]);
+        }
+        if(token.compare("Kd") == 0)
+        {
+            file >> Kd[0] >> Kd[1] >> Kd[2];
+            material.setKa(Kd[0], Kd[1], Kd[2]);
+        }
+        if(token.compare("Ks") == 0)
+        {
+            file >> Ks[0] >> Ks[1] >> Ks[2];
+            material.setKa(Ks[0], Ks[1], Ks[2]);
+        }
+        if(token.compare("Ns") == 0)
+        {
+            file >> Ns;
+            material.setNs(Ns);
+        }
+
+        file >> token;
+    }
+
+    file.close();
+
+    materialMap[fileName] = material;
+}
+
 
 Model* ModelsManager::getModel(const std::string name)
 {
@@ -242,7 +324,7 @@ void ModelsManager::loadTexture(std::string dir, std::string name, std::string s
     glGenTextures(1, &texId);
     glBindTexture(GL_TEXTURE_2D, texId);
 
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 

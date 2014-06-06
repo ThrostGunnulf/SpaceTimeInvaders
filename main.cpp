@@ -70,6 +70,8 @@ void drawScore()
 
 void drawObjects(void)
 {
+    glutSolidCube(25);
+
     player->update(msec);
     if(playerBullet)
         playerBullet->update(msec);
@@ -206,6 +208,11 @@ void init(void)
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    GLfloat intensidadeCor[4]={ 1, 1, 1, 1.0};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, intensidadeCor);
 
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
