@@ -168,6 +168,8 @@ void Timer(int value)
 
 int main(int argc, char** argv)
 {
+    printf("GL_MAX_LIGHTS = %d\n(please remove me later, I'm in main)\n", (int) GL_MAX_LIGHTS);
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(screenWidth, screenHeight);
@@ -211,8 +213,21 @@ void init(void)
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
-    GLfloat intensidadeCor[4]={ 1, 1, 1, 1.0};
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, intensidadeCor);
+    GLfloat intensidadeCor[4] = {1.0, 1.0, 1.0, 1.0};
+    //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, intensidadeCor);
+
+    glEnable(GL_LIGHT1);
+    GLfloat direccao[4] = {0, 0, -1};
+    glLightfv(GL_LIGHT1,GL_POSITION,				obsP);
+    glLightfv(GL_LIGHT1,GL_AMBIENT,					intensidadeCor);
+    glLightfv(GL_LIGHT1,GL_DIFFUSE,					intensidadeCor);
+    glLightfv(GL_LIGHT1,GL_SPECULAR,				intensidadeCor);
+    glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION,	    1.0);
+    glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION,		0.05);
+    glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,	0.0);
+    glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,				70);
+    glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,			direccao);
+    glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,			2.0);
 
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 

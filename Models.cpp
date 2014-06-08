@@ -1,3 +1,4 @@
+#include <string.h>
 #include "Models.hxx"
 
 ////
@@ -32,6 +33,11 @@ void Model::draw()
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texId);
 
+    glMaterialfv(GL_FRONT, GL_AMBIENT, material->Ka);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, material->Kd);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, material->Ks);
+    glMaterialfv(GL_FRONT, GL_SHININESS, &material->Ns);
+
     glColor3f(1.0, 0.0, 0.0);
     for(int i=0; i < numFaces; i++)
     {
@@ -53,7 +59,6 @@ void Model::draw()
     glDisable(GL_TEXTURE_2D);
 }
 
-
 void Model::drawBBox(GLfloat _x, GLfloat _y, GLfloat _sx, GLfloat _sy)
 {
     updateBBox(_x, _y);
@@ -73,13 +78,16 @@ void Model::assignTexture(GLuint id)
     texId = id;
 }
 
+void Model::assignMaterial(Material* mat)
+{
+    material = mat;
+}
 
 void Model::createBBox(GLfloat _height, GLfloat _width)
 {
     height = _height;
     width = _width;
 }
-
 
 void Model::updateBBox(GLfloat x, GLfloat y)
 {
@@ -88,7 +96,6 @@ void Model::updateBBox(GLfloat x, GLfloat y)
     y1 = y4 = y + height;
     y2 = y3 = y;
 }
-
 
 Model::~Model()
 {
@@ -107,6 +114,14 @@ Model::~Model()
 
 ////
 // Material
+Material::Material()
+{
+    Ns = 0;
+    memset(Ka, 0, 3 * sizeof(GLfloat)); Ka[3] = 1.0;
+    memset(Kd, 0, 3 * sizeof(GLfloat)); Kd[3] = 1.0;
+    memset(Ks, 0, 3 * sizeof(GLfloat)); Ks[3] = 1.0;
+}
+
 void Material::setKa(GLfloat r, GLfloat g, GLfloat b)
 {
     Ka[0] = r;
@@ -132,7 +147,6 @@ void Material::setNs(GLfloat ns)
 {
     Ns = ns;
 }
-
 
 ////
 // ModelsManager
@@ -168,6 +182,7 @@ ModelsManager::ModelsManager(std::string dir, std::string modelsList)
         file >> token;
         if(materialMap.find(token) == materialMap.end())
             loadMaterial(dir, token);
+        modelsVector.at(i)->assignMaterial(materialMap[token]);
 
         file >> token;
     }
@@ -180,11 +195,12 @@ ModelsManager::~ModelsManager()
     modelsVector.clear();
     modelIndexMap.clear();
     texIdMap.clear();
+    materialMap.clear();
 }
 
 void ModelsManager::loadMaterial(std::string dir, std::string matName)
 {
-    Material material;
+    Material* material = new Material();
     std::string fileName = dir + matName + ".mtl";
     std::string token;
 
@@ -195,47 +211,44 @@ void ModelsManager::loadMaterial(std::string dir, std::string matName)
         exit(-1);
     }
 
+    GLfloat Ka[3], Kd[3], Ks[3], Ns;
     for(int i=0; !file.eof(); i++)
     {
-        GLfloat Ka[3], Kd[3], Ks[3], Ns;
-
         file >> token;
 
         if(token.compare("Ka") == 0)
         {
             file >> Ka[0] >> Ka[1] >> Ka[2];
-            material.setKa(Ka[0], Ka[1], Ka[2]);
+            material->setKa(Ka[0], Ka[1], Ka[2]);
         }
-        if(token.compare("Kd") == 0)
+        else if(token.compare("Kd") == 0)
         {
             file >> Kd[0] >> Kd[1] >> Kd[2];
-            material.setKa(Kd[0], Kd[1], Kd[2]);
+            material->setKd(Kd[0], Kd[1], Kd[2]);
         }
-        if(token.compare("Ks") == 0)
+        else if(token.compare("Ks") == 0)
         {
             file >> Ks[0] >> Ks[1] >> Ks[2];
-            material.setKa(Ks[0], Ks[1], Ks[2]);
+            material->setKs(Ks[0], Ks[1], Ks[2]);
         }
-        if(token.compare("Ns") == 0)
+        else if(token.compare("Ns") == 0)
         {
             file >> Ns;
-            material.setNs(Ns);
+            material->setNs(Ns);
         }
-
-        file >> token;
+        else
+            file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 
     file.close();
 
-    materialMap[fileName] = material;
+    materialMap[matName] = material;
 }
-
 
 Model* ModelsManager::getModel(const std::string name)
 {
     return modelsVector.at(modelIndexMap[name]);
 }
-
 
 void ModelsManager::loadModel(const std::string& objFile, const std::string& modelName, int objNum)
 {
