@@ -74,7 +74,12 @@ void drawObjects(void)
 
     player->update(msec);
     if(playerBullet)
+    {
+        GLfloat bulletLightPos[4] = {playerBullet->x, playerBullet->y, playerBullet->z, 1.0};
+        glLightfv(GL_LIGHT7, GL_POSITION, bulletLightPos);
+
         playerBullet->update(msec);
+    }
 
     planet->update(msec);
 }
@@ -107,6 +112,18 @@ void keyOperations(void)
         playerBullet = new Object(bulletModel, player->x, player->y, player->z);
         playerBullet->setVelocity(0, 1, 0);
         playerBullet->setRotation(10, 0, 1, 0);
+
+        glEnable(GL_LIGHT7);
+        GLfloat colorIntensity[4] = {255, 189, 38, 1};
+        GLfloat bulletLightPos[4] = {playerBullet->x, playerBullet->y, playerBullet->z, 1.0};
+        glLightfv(GL_LIGHT7,GL_POSITION,				bulletLightPos);
+        glLightfv(GL_LIGHT7,GL_AMBIENT,					colorIntensity);
+        glLightfv(GL_LIGHT7,GL_DIFFUSE,					colorIntensity);
+        glLightfv(GL_LIGHT7,GL_SPECULAR,				colorIntensity);
+        glLightf(GL_LIGHT7,GL_CONSTANT_ATTENUATION,	    1);
+        glLightf(GL_LIGHT7,GL_LINEAR_ATTENUATION,		0.5);
+        glLightf(GL_LIGHT7,GL_QUADRATIC_ATTENUATION,	0.5);
+        glLightf(GL_LIGHT7,GL_SPOT_EXPONENT,			0.1);
     }
 
     if(specialKeyState[GLUT_KEY_LEFT])
@@ -121,6 +138,8 @@ void keyOperations(void)
 
 void destroyBullet()
 {
+    glDisable(GL_LIGHT7);
+
     std::cout << "DEBUG: Bullet destroyed\n";
     delete playerBullet;
     playerBullet = NULL;
@@ -153,7 +172,10 @@ void Timer(int value)
     {
         gameLive = true;
         if(playerBullet != NULL)
+        {
+            glDisable(GL_LIGHT7);
             playerBullet = NULL;
+        }
 
         enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
         player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
@@ -212,7 +234,7 @@ void init(void)
     glCullFace(GL_BACK);
 
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
+    //glEnable(GL_LIGHT0);
     GLfloat intensidadeCor[4] = {1.0, 1.0, 1.0, 1.0};
     //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, intensidadeCor);
 
@@ -225,7 +247,7 @@ void init(void)
     glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION,	    1.0);
     glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION,		0.05);
     glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,	0.0);
-    glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,				70);
+    //glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,				70);
     glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,			direccao);
     glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,			2.0);
 
