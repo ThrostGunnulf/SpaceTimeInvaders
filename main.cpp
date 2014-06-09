@@ -28,9 +28,10 @@ void specialKeyPressEvent(int, int, int);
 void specialKeyReleaseEvent(int, int, int);
 void mouseDragEvent(int, int);
 void mouseClickEvent(int, int, int, int);
-void drawScore();
+void drawScore(int, int);
 void destroyBullet();
 void destroyObjects();
+void drawHUD();
 void updateObsP();
 
 ////
@@ -56,14 +57,14 @@ Object* planet = NULL;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
 
-void drawScore()
+void drawScore(int x, int y)
 {
     char scr[20], *aux=scr;
     sprintf(scr, "Score: %d", score);
 
-    glColor3f(255, 255, 255);
+    glColor3f(1.0, 1.0, 1.0);
 
-    glRasterPos2f(-150, 115);
+    glRasterPos2f(x, y);
     while (*aux)
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
 }
@@ -82,6 +83,26 @@ void drawObjects(void)
     }
 
     planet->update(msec);
+}
+
+void drawHUD()
+{
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0, screenWidth, screenHeight, 0.0, -1.0, 10.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    drawScore(40, 50);
+
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_LIGHTING);
 }
 
 void drawGameover()
@@ -177,7 +198,11 @@ void Timer(int value)
             playerBullet = NULL;
         }
 
+        if(enemyManager != NULL)
+            delete enemyManager;
         enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
+        if(player != NULL)
+            delete player;
         player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
         player->setScale(1, 1, 1);
         score = 0;
@@ -287,8 +312,8 @@ void display(void)
     {
         drawObjects();
         enemyManager->draw();
+        drawHUD();
     }
-    drawScore();
 
     if(!gameLive)
         drawGameover();
