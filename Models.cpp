@@ -28,10 +28,24 @@ void Model::allocSpace()
         texPoints[i] = &_texPoints[2*i];
 }
 
+void Model::setTextureEnvironment(void)
+{
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, textureMode);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, hWrap);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, vWrap);
+}
+
 void Model::draw()
 {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texId);
+
+    setTextureEnvironment();
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, material->Ka);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, material->Kd);
@@ -167,34 +181,39 @@ ModelsManager::ModelsManager(std::string dir, std::string modelsList)
     for(int i=0; !file.eof(); i++)
     {
         loadModel(dir + token + ".obj", token, i);
+        Model* curModel = modelsVector.at(i);
         file >> token;
         file >> param;
         file >> sOpt;
         file >> tOpt;
-        if(texIdMap.find(token + "_" + param) == texIdMap.end())
-        {
-            if(param.compare("mod") == 0)
-            {
-                std::cout << "MOD" << std::endl;
-                loadTexture(dir, token, true, sOpt, tOpt);
-            }
-            else
-            {
-                std::cout << "DEC" << std::endl;
-                loadTexture(dir, token, false, sOpt, tOpt);
-            }
-        }
+        if(texIdMap.find(token) == texIdMap.end())
+            loadTexture(dir, token);
 
-        modelsVector.at(i)->assignTexture(texIdMap[token + "_" + param]);
+        if(param.compare("mod") == 0)
+            curModel->textureMode = GL_MODULATE;
+        else
+            curModel->textureMode = GL_DECAL;
+
+        if(sOpt.compare("GL_CLAMP") == 0)
+            curModel->hWrap = GL_CLAMP;
+        else
+            curModel->hWrap = GL_REPEAT;
+
+        if(tOpt.compare("GL_CLAMP") == 0)
+            curModel->vWrap = GL_CLAMP;
+        else
+            curModel->vWrap = GL_REPEAT;
+
+        curModel->assignTexture(texIdMap[token]);
 
         file >> width;
         file >> height;
-        modelsVector.at(i)->createBBox(height, width);
+        curModel->createBBox(height, width);
 
         file >> token;
         if(materialMap.find(token) == materialMap.end())
             loadMaterial(dir, token);
-        modelsVector.at(i)->assignMaterial(materialMap[token]);
+        curModel->assignMaterial(materialMap[token]);
 
         file >> token;
     }
@@ -341,7 +360,7 @@ void ModelsManager::countObjFileSizes(std::ifstream& objFile, Model* count)
     objFile.seekg(0, std::ios::beg);
 }
 
-void ModelsManager::loadTexture(std::string dir, std::string name, bool isModulate,std::string sOpt, std::string tOpt)
+void ModelsManager::loadTexture(std::string dir, std::string name)
 {
     GLuint texId;
     RgbImage imag;
@@ -349,22 +368,8 @@ void ModelsManager::loadTexture(std::string dir, std::string name, bool isModula
     glGenTextures(1, &texId);
     glBindTexture(GL_TEXTURE_2D, texId);
 
-    if(isModulate)
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    else
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    if(sOpt.compare("GL_CLAMP") == 0)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    else
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-
-    if(tOpt.compare("GL_CLAMP") == 0)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    else
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     imag.LoadBmpFile((dir + name + ".bmp").c_str());
     glTexImage2D(GL_TEXTURE_2D, 0, 3,
@@ -372,10 +377,5 @@ void ModelsManager::loadTexture(std::string dir, std::string name, bool isModula
         imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
         imag.ImageData());
 
-    if(isModulate)
-        texIdMap[name + "_mod"] = texId;
-    else
-        texIdMap[name + "_dec"] = texId;
-
-    std::cout << texId << std::endl;
+    texIdMap[name] = texId;
 }

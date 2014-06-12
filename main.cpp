@@ -100,8 +100,6 @@ void drawObjects(void)
 void drawHUD()
 {
     glDisable(GL_LIGHTING);
-    glDisable(GL_CULL_FACE);
-
     glClear(GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
@@ -119,22 +117,34 @@ void drawHUD()
 
 void drawGameover()
 {
+    glDisable(GL_LIGHTING);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0, screenWidth, screenHeight, 0.0, -1.0, 10.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
     char gameoverStr[100], *aux = gameoverStr;
 
-    sprintf(gameoverStr, "      GAME OVER!");
+    sprintf(gameoverStr, "GAME OVER!");
 
     glColor3f(255, 255, 255);
 
-    glRasterPos2f(-25, 0);
+    glRasterPos2f(screenWidth/2 - 93, screenHeight/2);
     while (*aux)
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
 
     sprintf(gameoverStr, "(hit Space to retry)");
     aux = gameoverStr;
-    glRasterPos2f(-25, -15);
+    glRasterPos2f(screenWidth/2 - 100, screenHeight/2 + 20);
     while (*aux)
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
 
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_LIGHTING);
 }
 
 void keyOperations(void)
