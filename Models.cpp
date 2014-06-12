@@ -162,18 +162,30 @@ ModelsManager::ModelsManager(std::string dir, std::string modelsList)
     }
 
     GLfloat height, width;
-    std::string token, sOpt, tOpt;
+    std::string token, param, sOpt, tOpt;
     file >> token;
     for(int i=0; !file.eof(); i++)
     {
         loadModel(dir + token + ".obj", token, i);
         file >> token;
+        file >> param;
         file >> sOpt;
         file >> tOpt;
-        if(texIdMap.find(token) == texIdMap.end())
-            loadTexture(dir, token, sOpt, tOpt);
+        if(texIdMap.find(token + "_" + param) == texIdMap.end())
+        {
+            if(param.compare("mod") == 0)
+            {
+                std::cout << "MOD" << std::endl;
+                loadTexture(dir, token, true, sOpt, tOpt);
+            }
+            else
+            {
+                std::cout << "DEC" << std::endl;
+                loadTexture(dir, token, false, sOpt, tOpt);
+            }
+        }
 
-        modelsVector.at(i)->assignTexture(texIdMap[token]);
+        modelsVector.at(i)->assignTexture(texIdMap[token + "_" + param]);
 
         file >> width;
         file >> height;
@@ -329,7 +341,7 @@ void ModelsManager::countObjFileSizes(std::ifstream& objFile, Model* count)
     objFile.seekg(0, std::ios::beg);
 }
 
-void ModelsManager::loadTexture(std::string dir, std::string name, std::string sOpt, std::string tOpt)
+void ModelsManager::loadTexture(std::string dir, std::string name, bool isModulate,std::string sOpt, std::string tOpt)
 {
     GLuint texId;
     RgbImage imag;
@@ -337,7 +349,10 @@ void ModelsManager::loadTexture(std::string dir, std::string name, std::string s
     glGenTextures(1, &texId);
     glBindTexture(GL_TEXTURE_2D, texId);
 
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    if(isModulate)
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    else
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
@@ -357,5 +372,10 @@ void ModelsManager::loadTexture(std::string dir, std::string name, std::string s
         imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
         imag.ImageData());
 
-    texIdMap[name] = texId;
+    if(isModulate)
+        texIdMap[name + "_mod"] = texId;
+    else
+        texIdMap[name + "_dec"] = texId;
+
+    std::cout << texId << std::endl;
 }

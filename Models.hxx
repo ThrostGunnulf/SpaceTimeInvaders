@@ -65,7 +65,7 @@ private:
 
     void loadModel(const std::string& objFile, const std::string& modelName, int objNum);
     void countObjFileSizes(std::ifstream& objFile, Model* count);
-    void loadTexture(std::string dir, std::string name, std::string sOpt, std::string tOpt);
+    void loadTexture(std::string dir, std::string name, bool isModulate,std::string sOpt, std::string tOpt);
     void loadMaterial(std::string dir, std::string file);
 };
 
