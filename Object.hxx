@@ -11,7 +11,7 @@ public:
     Model* model;
     Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z);
     ~Object() {}
-	void update(GLfloat delta);
+    virtual void update(GLfloat delta);
 	void move(GLfloat dx, GLfloat dy, GLfloat dz);
 	void setRotation(GLfloat vel, GLfloat _ax, GLfloat _ay, GLfloat _az);
 	void setVelocity(GLfloat _velX, GLfloat _velY, GLfloat _velZ);
@@ -19,7 +19,7 @@ public:
 	void setScale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ);
     GLfloat getVelX();
 
-private:
+protected:
     GLfloat velX, velY, velZ, angle, dangle, ax, ay, az;
 
 	void normalizeAngle();

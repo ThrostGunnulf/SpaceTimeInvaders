@@ -9,6 +9,7 @@
 #include "Object.hxx"
 #include "portable.h"
 #include "EnemyManager.hxx"
+#include "DefenseBunker.hxx"
 
 #define ZOOM_SPEED 1.2
 #define CAMERA_ROTATION_SPEED 100.0
@@ -56,6 +57,7 @@ Object* playerBullet = NULL;
 Object* planet = NULL;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
+DefenseBunker* bunker1 = NULL;
 
 void drawScore(int x, int y)
 {
@@ -71,8 +73,6 @@ void drawScore(int x, int y)
 
 void drawObjects(void)
 {
-    glutSolidCube(25);
-
     player->update(msec);
     if(playerBullet)
     {
@@ -83,6 +83,7 @@ void drawObjects(void)
     }
 
     planet->update(msec);
+    bunker1->update(msec);
 }
 
 void drawHUD()
@@ -181,6 +182,8 @@ void Timer(int value)
             Object* tempBullet = playerBullet;
             score += enemyManager->checkCollision(tempBullet);
         }
+        if(playerBullet != NULL && bunker1->checkColision(playerBullet))
+            destroyBullet();
 
         if(playerBullet != NULL && playerBullet->y > 1.2*yC)
             destroyBullet();
@@ -272,20 +275,22 @@ void init(void)
     glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION,	    1.0);
     glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION,		0.05);
     glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,	0.0);
-    //glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,				70);
+    glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,			    30);
     glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,			direccao);
     glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,			2.0);
 
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-    enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
+    enemyManager = new EnemyManager(modelsManager, 80, 0.25, 20);
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(1, 1, 1);
     planet = new Object(modelsManager->getModel("planet"), 275, -200, -575);
     planet->setScale(50, 50, 50);
     planet->setRotation(0.05, 0, 1, 0);
+
+    bunker1 = new DefenseBunker(0, 30, 0, 3, 3, 12);
 }
 
 void display(void)
@@ -329,6 +334,7 @@ void destroyObjects()
     delete playerBullet;
     delete modelsManager;
     delete enemyManager;
+    delete bunker1;
 }
 
 
