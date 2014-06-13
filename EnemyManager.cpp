@@ -175,7 +175,7 @@ bool EnemyManager::checkPointInclusion(GLfloat bulletX, GLfloat bulletY, Object*
 {
     if(bulletX >= enemy->model->x1 && bulletX <= enemy->model->x3)
     {
-        if(bulletY >= enemy->model->y2 && bulletY <= enemy->model->y1)
+        if(bulletY >= enemy->model-> y2 && bulletY <= enemy->model->y1)
             return true;
     }
 

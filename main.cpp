@@ -9,7 +9,6 @@
 #include "Object.hxx"
 #include "portable.h"
 #include "EnemyManager.hxx"
-#include "DefenseBunker.hxx"
 
 #define ZOOM_SPEED 1.2
 #define CAMERA_ROTATION_SPEED 100.0
@@ -58,7 +57,6 @@ Object* planet = NULL;
 Object* space = NULL;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
-DefenseBunker* bunker1 = NULL;
 
 void drawScore(int x, int y)
 {
@@ -72,19 +70,11 @@ void drawScore(int x, int y)
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
 }
 
-void drawBackground()
+void drawSkyBox(void)
 {
-    planet->update(msec);
-
-    glDisable(GL_LIGHTING);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
+    glDisable(GL_CULL_FACE);
     space->update(msec);
-
     glEnable(GL_CULL_FACE);
-    glEnable(GL_LIGHTING);
 }
 
 void drawObjects(void)
@@ -99,7 +89,6 @@ void drawObjects(void)
     }
 
     planet->update(msec);
-    bunker1->update(msec);
 }
 
 void drawHUD()
@@ -138,7 +127,7 @@ void drawGameover()
 
     glColor3f(255, 255, 255);
 
-    glRasterPos2f(screenWidth/2 - 93, screenHeight/2);
+    glRasterPos2f(screenWidth/2 - 95, screenHeight/2);
     while (*aux)
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
 
@@ -207,8 +196,6 @@ void Timer(int value)
             Object* tempBullet = playerBullet;
             score += enemyManager->checkCollision(tempBullet);
         }
-        if(playerBullet != NULL && bunker1->checkColision(playerBullet))
-            destroyBullet();
 
         if(playerBullet != NULL && playerBullet->y > 1.2*yC)
             destroyBullet();
@@ -301,23 +288,22 @@ void init(void)
     glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION,	    1.0);
     glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION,		0.0);
     glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,	0.0);
-    glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,			    30);
+    glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,				16);
     glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,			direccao);
     glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,			32.0);
 
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-    enemyManager = new EnemyManager(modelsManager, 80, 0.25, 20);
+    enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(1, 1, 1);
     planet = new Object(modelsManager->getModel("planet"), 275, -200, -575);
     planet->setScale(50, 50, 50);
     planet->setRotation(0.05, 0, 1, 0);
-    bunker1 = new DefenseBunker(0, 30, 0, 3, 3, 12);
-    space = new Object(modelsManager->getModel("t1player"), 0, 0, -1000);
-    space->setScale(20, 20, 20);
+    space = new Object(modelsManager->getModel("skybox"), 0, 0, 0);
+    space->setScale(1250, 1250, 1250);
 }
 
 void display(void)
@@ -344,7 +330,7 @@ void display(void)
     {
         drawObjects();
         enemyManager->draw();
-        drawBackground();
+        drawSkyBox();
         drawHUD();
     }
 
@@ -362,7 +348,6 @@ void destroyObjects()
     delete playerBullet;
     delete modelsManager;
     delete enemyManager;
-    delete bunker1;
 }
 
 
@@ -448,7 +433,7 @@ void mouseClickEvent(int button, int state, int x, int y)
         r /= ZOOM_SPEED;
         updateObsP();
     }
-    else if(button == 4) //Scroll wheel backwards
+    else if(button == 4 && r < 1230) //Scroll wheel backwards
     {
         if(state == GLUT_UP)
             return;

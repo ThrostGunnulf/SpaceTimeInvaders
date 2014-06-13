@@ -335,7 +335,6 @@ void ModelsManager::loadModel(const std::string& objFile, const std::string& mod
     }
 
     modelIndexMap[modelName] = objNum;
-    objF.close();
 }
 
 void ModelsManager::countObjFileSizes(std::ifstream& objFile, Model* count)
