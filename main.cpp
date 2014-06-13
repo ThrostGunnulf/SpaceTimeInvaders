@@ -55,6 +55,7 @@ bool specialKeyState[256] = {false};
 Object* player = NULL;
 Object* playerBullet = NULL;
 Object* planet = NULL;
+Object* space = NULL;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
 DefenseBunker* bunker1 = NULL;
@@ -71,12 +72,27 @@ void drawScore(int x, int y)
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
 }
 
+void drawBackground()
+{
+    planet->update(msec);
+
+    glDisable(GL_LIGHTING);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    space->update(msec);
+
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_LIGHTING);
+}
+
 void drawObjects(void)
 {
     player->update(msec);
     if(playerBullet)
     {
-        GLfloat bulletLightPos[4] = {playerBullet->x, playerBullet->y, playerBullet->z, 1.0};
+        GLfloat bulletLightPos[4] = {playerBullet->x, playerBullet->y, playerBullet->z + 15, 1.0};
         glLightfv(GL_LIGHT7, GL_POSITION, bulletLightPos);
 
         playerBullet->update(msec);
@@ -89,8 +105,6 @@ void drawObjects(void)
 void drawHUD()
 {
     glDisable(GL_LIGHTING);
-    glDisable(GL_CULL_FACE);
-
     glClear(GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
@@ -108,22 +122,34 @@ void drawHUD()
 
 void drawGameover()
 {
+    glDisable(GL_LIGHTING);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0, screenWidth, screenHeight, 0.0, -1.0, 10.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
     char gameoverStr[100], *aux = gameoverStr;
 
-    sprintf(gameoverStr, "      GAME OVER!");
+    sprintf(gameoverStr, "GAME OVER!");
 
     glColor3f(255, 255, 255);
 
-    glRasterPos2f(-25, 0);
+    glRasterPos2f(screenWidth/2 - 93, screenHeight/2);
     while (*aux)
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
 
     sprintf(gameoverStr, "(hit Space to retry)");
     aux = gameoverStr;
-    glRasterPos2f(-25, -15);
+    glRasterPos2f(screenWidth/2 - 100, screenHeight/2 + 20);
     while (*aux)
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
 
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_LIGHTING);
 }
 
 void keyOperations(void)
@@ -134,7 +160,6 @@ void keyOperations(void)
         playerBullet = new Object(bulletModel, player->x, player->y, player->z);
         playerBullet->setVelocity(0, 1, 0);
         playerBullet->setRotation(10, 0, 1, 0);
-
         glEnable(GL_LIGHT7);
         GLfloat colorIntensity[4] = {255, 189, 38, 1};
         GLfloat bulletLightPos[4] = {playerBullet->x, playerBullet->y, playerBullet->z, 1.0};
@@ -211,7 +236,6 @@ void Timer(int value)
         score = 0;
     }
 
-
     glutPostRedisplay();
     glutTimerFunc(msec, Timer, 0);
 }
@@ -262,22 +286,24 @@ void init(void)
     glCullFace(GL_BACK);
 
     glEnable(GL_LIGHTING);
+    glEnable(GL_NORMALIZE);
     //glEnable(GL_LIGHT0);
-    GLfloat intensidadeCor[4] = {1.0, 1.0, 1.0, 1.0};
-    //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, intensidadeCor);
+    GLfloat intensidadeCor[4] = {0.30, 0.30, 0.30, 1.0};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, intensidadeCor);
 
     glEnable(GL_LIGHT1);
-    GLfloat direccao[4] = {0, 0, -1};
-    glLightfv(GL_LIGHT1,GL_POSITION,				obsP);
+    GLfloat direccao[] = {0, 5, -10, 0};
+    GLfloat posicaoLuz[] = {0, 5, 3, 1};
+    glLightfv(GL_LIGHT1,GL_POSITION,				posicaoLuz);
     glLightfv(GL_LIGHT1,GL_AMBIENT,					intensidadeCor);
     glLightfv(GL_LIGHT1,GL_DIFFUSE,					intensidadeCor);
     glLightfv(GL_LIGHT1,GL_SPECULAR,				intensidadeCor);
     glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION,	    1.0);
-    glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION,		0.05);
+    glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION,		0.0);
     glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,	0.0);
     glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,			    30);
     glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,			direccao);
-    glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,			2.0);
+    glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,			32.0);
 
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
@@ -289,8 +315,9 @@ void init(void)
     planet = new Object(modelsManager->getModel("planet"), 275, -200, -575);
     planet->setScale(50, 50, 50);
     planet->setRotation(0.05, 0, 1, 0);
-
     bunker1 = new DefenseBunker(0, 30, 0, 3, 3, 12);
+    space = new Object(modelsManager->getModel("t1player"), 0, 0, -1000);
+    space->setScale(20, 20, 20);
 }
 
 void display(void)
@@ -317,6 +344,7 @@ void display(void)
     {
         drawObjects();
         enemyManager->draw();
+        drawBackground();
         drawHUD();
     }
 

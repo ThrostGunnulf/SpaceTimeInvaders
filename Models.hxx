@@ -31,6 +31,7 @@ struct Model
     int** faces;
     float height, width, x1, x2, x3, x4, y1, y2, y3, y4;
     float **vertex, **normals, **texPoints;
+    unsigned int textureMode, hWrap, vWrap;
 
     Model();
     ~Model();
@@ -41,6 +42,7 @@ struct Model
     void createBBox(GLfloat _height, GLfloat _width);
     void updateBBox(GLfloat x, GLfloat y);
     void drawBBox(GLfloat _x, GLfloat _y, GLfloat _sx, GLfloat _sy);
+    void setTextureEnvironment(void);
 
 private:
     GLuint texId;
@@ -65,7 +67,7 @@ private:
 
     void loadModel(const std::string& objFile, const std::string& modelName, int objNum);
     void countObjFileSizes(std::ifstream& objFile, Model* count);
-    void loadTexture(std::string dir, std::string name, std::string sOpt, std::string tOpt);
+    void loadTexture(std::string dir, std::string name);
     void loadMaterial(std::string dir, std::string file);
 };
 
