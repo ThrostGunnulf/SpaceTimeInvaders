@@ -9,6 +9,7 @@
 #include "Object.hxx"
 #include "portable.h"
 #include "EnemyManager.hxx"
+#include "DefenseBunker.hxx"
 
 #define ZOOM_SPEED 1.2
 #define CAMERA_ROTATION_SPEED 100.0
@@ -57,6 +58,7 @@ Object* planet = NULL;
 Object* space = NULL;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
+DefenseBunker* bunker1 = NULL;
 
 void drawScore(int x, int y)
 {
@@ -89,6 +91,7 @@ void drawObjects(void)
     }
 
     planet->update(msec);
+    bunker1->update(msec);
 }
 
 void drawHUD()
@@ -196,6 +199,8 @@ void Timer(int value)
             Object* tempBullet = playerBullet;
             score += enemyManager->checkCollision(tempBullet);
         }
+        if(playerBullet && bunker1->checkColision(playerBullet))
+            destroyBullet();
 
         if(playerBullet != NULL && playerBullet->y > 1.2*yC)
             destroyBullet();
@@ -304,6 +309,8 @@ void init(void)
     planet->setRotation(0.05, 0, 1, 0);
     space = new Object(modelsManager->getModel("skybox"), 0, 0, 0);
     space->setScale(1250, 1250, 1250);
+
+    bunker1 = new DefenseBunker(0, 30, 0, 3, 3, 12);
 }
 
 void display(void)

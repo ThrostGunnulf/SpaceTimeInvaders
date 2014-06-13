@@ -136,11 +136,10 @@ bool DefenseBunker::checkColision(Object* bullet)
             if(intactAt(i, j))
             {
                 bool collision = checkPointInclusion(bullet->model->x1, bullet->model->y1, i, j) || checkPointInclusion(bullet->model->x2, bullet->model->y2, i, j) || checkPointInclusion(bullet->model->x3, bullet->model->y3, i, j) || checkPointInclusion(bullet->model->x4, bullet->model->y4, i, j);
-                printf("FODASSZ 1\n");
+
                 if(collision)
                 {
                     intactMatrix[i * nCols + j] = 0;
-                    printf("FODASSZ 2\n");
                     return true;
                 }
             }

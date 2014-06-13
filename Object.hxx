@@ -19,7 +19,7 @@ public:
 	void setScale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ);
     GLfloat getVelX();
 
-private:
+protected:
     GLfloat velX, velY, velZ, angle, dangle, ax, ay, az;
 
 	void normalizeAngle();
