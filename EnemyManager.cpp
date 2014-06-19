@@ -1,8 +1,5 @@
 #include "EnemyManager.hxx"
 
-#define ENEMYLINES 5
-#define ENEMYCOLUMNS 11
-
 ////
 // EnemyManager
 EnemyManager::EnemyManager(ModelsManager* _mm, GLint currY, GLfloat currS, GLfloat dBetweenEnemies) : mm(_mm), currentY(currY), currentSpeed(currS), goingRight(true)
@@ -33,6 +30,24 @@ EnemyManager::~EnemyManager()
 {
     delete enemyMatrix;
     delete _enemyMatrix;
+}
+
+bool EnemyManager::checkEnemyExists(int line, int column)
+{
+    if(enemyMatrix[line][column] != NULL)
+        return true;
+
+    return false;
+}
+
+GLfloat EnemyManager::getEnemyX(int line, int column)
+{
+    return enemyMatrix[line][column]->x;
+}
+
+GLfloat EnemyManager::getEnemyY(int line, int column)
+{
+    return enemyMatrix[line][column]->y;
 }
 
 void EnemyManager::draw()

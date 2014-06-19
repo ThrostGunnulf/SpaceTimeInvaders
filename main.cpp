@@ -3,6 +3,7 @@
 #include <cmath>
 #include <string>
 #include <ostream>
+#include <time.h>
 
 #include "RgbImage.h"
 #include "Models.hxx"
@@ -13,6 +14,10 @@
 
 #define ZOOM_SPEED 1.2
 #define CAMERA_ROTATION_SPEED 100.0
+
+#define NUM_LASERS 3
+#define SHOT_FREQUENCY_MAX 10000000
+#define SHOT_FREQUENCY_MIN 3
 
 #define BLACK 0.0, 0.0, 0.0, 1.0
 
@@ -34,6 +39,10 @@ void destroyBullet();
 void destroyObjects();
 void drawHUD();
 void updateObsP();
+void moveEnemyShots();
+bool checkEnemyShotCollision(int);
+void destroyLaser(int);
+void getRandomEnemy(GLfloat*);
 
 ////
 // Global variables.
@@ -56,6 +65,9 @@ Object* player = NULL;
 Object* playerBullet = NULL;
 Object* planet = NULL;
 Object* space = NULL;
+Object* enemyLasers[NUM_LASERS] = { NULL };
+unsigned int enemyLight = GL_LIGHT5;
+GLint liveShots = 0;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
 DefenseBunker* bunker1 = NULL;
@@ -75,6 +87,7 @@ void drawScore(int x, int y)
 void drawSkyBox(void)
 {
     glDisable(GL_CULL_FACE);
+    space->setRotation(-0.01, 1, 1, 0);
     space->update(msec);
     glEnable(GL_CULL_FACE);
 }
@@ -85,13 +98,24 @@ void drawObjects(void)
     if(playerBullet)
     {
         GLfloat bulletLightPos[4] = {playerBullet->x, playerBullet->y, playerBullet->z + 15, 1.0};
-        glLightfv(GL_LIGHT7, GL_POSITION, bulletLightPos);
+        glLightfv(GL_LIGHT4, GL_POSITION, bulletLightPos);
 
         playerBullet->update(msec);
     }
 
     planet->update(msec);
     bunker1->update(msec);
+
+    for(int i = 0; i < NUM_LASERS; i++)
+    {
+        if(enemyLasers[i] != NULL)
+        {
+            GLfloat enemyLightPos[4] = {enemyLasers[i]->x, enemyLasers[i]->y, enemyLasers[i]->z + 15, 1.0};
+            glLightfv(enemyLight+i, GL_POSITION, enemyLightPos);
+
+            enemyLasers[i]->update(msec);
+        }
+    }
 }
 
 void drawHUD()
@@ -144,6 +168,24 @@ void drawGameover()
     glEnable(GL_LIGHTING);
 }
 
+void getRandomEnemy(GLfloat* coords)
+{
+    bool found = false;
+    int line, col;
+
+    while(!found)
+    {
+        line = rand() % ENEMYLINES;
+        col = rand() % ENEMYCOLUMNS;
+
+        found = enemyManager->checkEnemyExists(line, col);
+    }
+
+    coords[0] = enemyManager->getEnemyX(line, col);
+    coords[1] = enemyManager->getEnemyY(line, col);
+    coords[2] = 0;
+}
+
 void keyOperations(void)
 {
     if(keyState[' '] && playerBullet == NULL) //SPACEBAR
@@ -152,17 +194,17 @@ void keyOperations(void)
         playerBullet = new Object(bulletModel, player->x, player->y, player->z);
         playerBullet->setVelocity(0, 1, 0);
         playerBullet->setRotation(10, 0, 1, 0);
-        glEnable(GL_LIGHT7);
+        glEnable(GL_LIGHT4);
         GLfloat colorIntensity[4] = {255, 189, 38, 1};
         GLfloat bulletLightPos[4] = {playerBullet->x, playerBullet->y, playerBullet->z, 1.0};
-        glLightfv(GL_LIGHT7,GL_POSITION,				bulletLightPos);
-        glLightfv(GL_LIGHT7,GL_AMBIENT,					colorIntensity);
-        glLightfv(GL_LIGHT7,GL_DIFFUSE,					colorIntensity);
-        glLightfv(GL_LIGHT7,GL_SPECULAR,				colorIntensity);
-        glLightf(GL_LIGHT7,GL_CONSTANT_ATTENUATION,	    1);
-        glLightf(GL_LIGHT7,GL_LINEAR_ATTENUATION,		0.5);
-        glLightf(GL_LIGHT7,GL_QUADRATIC_ATTENUATION,	0.5);
-        glLightf(GL_LIGHT7,GL_SPOT_EXPONENT,			0.1);
+        glLightfv(GL_LIGHT4,GL_POSITION,				bulletLightPos);
+        glLightfv(GL_LIGHT4,GL_AMBIENT,					colorIntensity);
+        glLightfv(GL_LIGHT4,GL_DIFFUSE,					colorIntensity);
+        glLightfv(GL_LIGHT4,GL_SPECULAR,				colorIntensity);
+        glLightf(GL_LIGHT4,GL_CONSTANT_ATTENUATION,	    1);
+        glLightf(GL_LIGHT4,GL_LINEAR_ATTENUATION,		0.5);
+        glLightf(GL_LIGHT4,GL_QUADRATIC_ATTENUATION,	0.5);
+        glLightf(GL_LIGHT4,GL_SPOT_EXPONENT,			0.1);
     }
 
     if(specialKeyState[GLUT_KEY_LEFT])
@@ -177,12 +219,42 @@ void keyOperations(void)
 
 void destroyBullet()
 {
-    glDisable(GL_LIGHT7);
+    glDisable(GL_LIGHT4);
 
     std::cout << "DEBUG: Bullet destroyed\n";
     delete playerBullet;
     playerBullet = NULL;
 }
+
+void moveEnemyShots()
+{
+    for(int i = 0; i < NUM_LASERS; i++)
+    {
+        if(enemyLasers[i] != NULL)
+        {
+            bool collided = checkEnemyShotCollision(i);
+
+            if(collided || enemyLasers[i]->y < -100)
+                destroyLaser(i);
+            else
+                enemyLasers[i]->setVelocity(0, -1, 0);
+        }
+    }
+}
+
+bool checkEnemyShotCollision(int shotIndex)
+{
+    return false;
+}
+
+void destroyLaser(int laserIndex)
+{
+    glDisable(enemyLight+laserIndex);
+    delete enemyLasers[laserIndex];
+    enemyLasers[laserIndex] = NULL;
+    liveShots--;
+}
+
 
 void Timer(int value)
 {
@@ -192,6 +264,7 @@ void Timer(int value)
 
         enemyManager->move();
         enemyManager->updateBBoxes();
+        moveEnemyShots();
 
         if(playerBullet != NULL)
         {
@@ -207,6 +280,39 @@ void Timer(int value)
 
         if(gameLive && enemyManager->checkGameover())
             gameLive = false;
+
+        int rng = rand() % SHOT_FREQUENCY_MAX;
+        if(liveShots < NUM_LASERS && rng < SHOT_FREQUENCY_MIN)
+        {
+            int i;
+            for(i = 0; i < NUM_LASERS; i++)
+            {
+                if(enemyLasers[i] == NULL)
+                    break;
+            }
+
+            if(i < NUM_LASERS)
+            {
+                GLfloat* laserPosition = new GLfloat[3];
+
+                getRandomEnemy(laserPosition);
+
+                enemyLasers[i] = new Object(modelsManager->getModel("t1invaderlaser"), laserPosition[0], laserPosition[1], laserPosition[2]);
+                liveShots++;
+
+                glEnable(enemyLight+i);
+                GLfloat enemyLaserIntensity[4] = {255, 0, 0, 1};
+                GLfloat enemyLightPos[4] = {enemyLasers[i]->x, enemyLasers[i]->y, enemyLasers[i]->z, 1.0};
+                glLightfv(enemyLight+i,GL_POSITION,				enemyLightPos);
+                glLightfv(enemyLight+i,GL_AMBIENT,					enemyLaserIntensity);
+                glLightfv(enemyLight+i,GL_DIFFUSE,					enemyLaserIntensity);
+                glLightfv(enemyLight+i,GL_SPECULAR,				enemyLaserIntensity);
+                glLightf(enemyLight+i,GL_CONSTANT_ATTENUATION,	    1);
+                glLightf(enemyLight+i,GL_LINEAR_ATTENUATION,		0.5);
+                glLightf(enemyLight+i,GL_QUADRATIC_ATTENUATION,	0.5);
+                glLightf(enemyLight+i,GL_SPOT_EXPONENT,			0.1);
+            }
+        }
     }
 
     if(!gameLive && keyState[' '])
@@ -214,7 +320,7 @@ void Timer(int value)
         gameLive = true;
         if(playerBullet != NULL)
         {
-            glDisable(GL_LIGHT7);
+            glDisable(GL_LIGHT4);
             playerBullet = NULL;
         }
 
@@ -226,6 +332,13 @@ void Timer(int value)
         player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
         player->setScale(1, 1, 1);
         score = 0;
+
+        liveShots = 0;
+        for(int i = 0; i < NUM_LASERS; i++)
+        {
+            delete enemyLasers[i];
+            enemyLasers[i] = NULL;
+        }
     }
 
     glutPostRedisplay();
@@ -235,12 +348,15 @@ void Timer(int value)
 int main(int argc, char** argv)
 {
     printf("GL_MAX_LIGHTS = %d\n(please remove me later, I'm in main)\n", (int) GL_MAX_LIGHTS);
+    printf("VALOR DA ENEMYLIGHT INICIAL = %u (print in main)\n", enemyLight);
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(screenWidth, screenHeight);
     glutInitWindowPosition(448, 156);
     glutCreateWindow("SpaceTime Invaders");
+
+    srand(time(NULL));
 
     init();
 
@@ -257,6 +373,7 @@ int main(int argc, char** argv)
     glutMotionFunc(mouseDragEvent);
 
     glutTimerFunc(msec, Timer, 0);
+
     glutMainLoop();
 
     destroyObjects();

@@ -2,6 +2,9 @@
 #include "Object.hxx"
 #include "main.h"
 
+#define ENEMYLINES 5
+#define ENEMYCOLUMNS 11
+
 class EnemyManager
 {
 public:
@@ -14,6 +17,9 @@ public:
     bool checkPointInclusion(GLfloat, GLfloat, Object*);
     void updateBBoxes();
     bool checkGameover();
+    bool checkEnemyExists(int, int);
+    GLfloat getEnemyX(int, int);
+    GLfloat getEnemyY(int, int);
 
 private:
 	ModelsManager* mm;
