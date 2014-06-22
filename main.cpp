@@ -16,9 +16,9 @@
 #define CAMERA_ROTATION_SPEED 100.0
 
 #define NUM_BUNKERS 3
-#define NUM_LASERS 3
+#define NUM_LASERS 1
 #define SHOT_FREQUENCY_MAX 10000000
-#define SHOT_FREQUENCY_MIN 50
+#define SHOT_FREQUENCY_MIN 1000
 
 #define PLAYER_LASER_CEILING 215
 #define ENEMY_LASER_FLOOR -100
@@ -126,6 +126,18 @@ void drawObjects(void)
 
             enemyLasers[i]->update(msec);
             enemyLasers[i]->model->updateBBox(enemyLasers[i]->x, enemyLasers[i]->y);
+
+            //Uncomment this section to display laser numbers
+            /*glDisable(GL_LIGHTING);
+            char scr[20], *aux=scr;
+            sprintf(scr, "%d", i);
+
+            glColor3f(0.0, 1.0, 0.0);
+
+            glRasterPos3f(enemyLasers[i]->x, enemyLasers[i]->y, 2);
+            while (*aux)
+                glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
+            glEnable(GL_LIGHTING);*/
         }
     }
 }
@@ -260,8 +272,11 @@ void Timer(int value)
         enemyManager->move();
         enemyManager->updateBBoxes();
 
+        //printf("TESTING COLLISIONS\n");
         for(int i = 0; i < NUM_LASERS; i++)
         {
+            //printf("[%d] %p\n", i, enemyLasers[i]);
+
             if(enemyLasers[i] == NULL)
                 continue;
 
@@ -277,13 +292,14 @@ void Timer(int value)
                 }
             }
 
-            /*if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
+            if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
             {
                 playerLives--;
                 std::cout << "PLAYER MORREU! FICOU COM " << playerLives << " vidas.\n";
                 destroyLaser(i);
-            }*/
+            }
         }
+        //printf("\n");
 
         if(playerBullet != NULL)
         {
@@ -423,7 +439,7 @@ void init(void)
 
     glEnable(GL_LIGHTING);
     glEnable(GL_NORMALIZE);
-    glEnable(GL_LIGHT0);
+    //glEnable(GL_LIGHT0);
 
     glEnable(GL_LIGHT1);
     GLfloat intensidadeCor[4] = {0.2, 0.2, 0.2, 1.0};
@@ -456,6 +472,10 @@ void init(void)
     bunkers[0] = new DefenseBunker(-85, 30, 0, 3, 3, 12);
     bunkers[1] = new DefenseBunker(0, 30, 0, 3, 3, 12);
     bunkers[2] = new DefenseBunker(85, 30, 0, 3, 3, 12);
+
+
+    for(int i=0; i < NUM_LASERS; i++)
+        enemyLasers[i] = NULL;
 }
 
 void display(void)

@@ -10,7 +10,7 @@ public:
     GLfloat x, y, z, sx, sy, sz;
     Model* model;
     Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z);
-    ~Object() {}
+    virtual ~Object() {}
 	void update(GLfloat delta);
 	void move(GLfloat dx, GLfloat dy, GLfloat dz);
 	void setRotation(GLfloat vel, GLfloat _ax, GLfloat _ay, GLfloat _az);

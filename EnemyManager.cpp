@@ -28,8 +28,8 @@ EnemyManager::EnemyManager(ModelsManager* _mm, GLint currY, GLfloat currS, GLflo
 
 EnemyManager::~EnemyManager()
 {
-    delete enemyMatrix;
-    delete _enemyMatrix;
+    delete[] enemyMatrix;
+    delete[] _enemyMatrix;
 }
 
 bool EnemyManager::checkEnemyExists(int line, int column)
@@ -168,6 +168,7 @@ int EnemyManager::checkCollision(Object*& bullet)
                 if(answer)
                 {
                     destroyBullet();
+                    delete enemyMatrix[i][j];
                     enemyMatrix[i][j] = NULL;
 
                     //INSERT BIG EXPLOSION HERE
