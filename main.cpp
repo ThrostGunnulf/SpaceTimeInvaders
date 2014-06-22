@@ -18,9 +18,10 @@
 #define NUM_BUNKERS 3
 #define NUM_LASERS 3
 #define SHOT_FREQUENCY_MAX 10000000
-#define SHOT_FREQUENCY_MIN 3
+#define SHOT_FREQUENCY_MIN 50
 
-#define MISSING_CEILING 215
+#define PLAYER_LASER_CEILING 215
+#define ENEMY_LASER_FLOOR -100
 
 #define LEFT_LIMIT -150
 #define RIGHT_LIMIT 150
@@ -124,6 +125,7 @@ void drawObjects(void)
             glLightfv(firstEnemyLight+i, GL_POSITION, enemyLightPos);
 
             enemyLasers[i]->update(msec);
+            enemyLasers[i]->model->updateBBox(enemyLasers[i]->x, enemyLasers[i]->y);
         }
     }
 }
@@ -239,30 +241,13 @@ void destroyBullet()
     playerBullet = NULL;
 }
 
-/*void moveEnemyShots()
-{
-    for(int i = 0; i < NUM_LASERS; i++)
-    {
-        if(enemyLasers[i] != NULL)
-        {
-            enemyLasers[i]->model->updateBBox(enemyLasers[i]->x, enemyLasers[i]->y);
-
-
-        }
-    }
-}
-
-bool checkEnemyShotCollision(int shotIndex)
-{
-    return false;
-}*/
-
 void destroyLaser(int laserIndex)
 {
     glDisable(firstEnemyLight+laserIndex);
     delete enemyLasers[laserIndex];
     enemyLasers[laserIndex] = NULL;
     liveShots--;
+    printf("LASER %d DESTRUIDO\n", laserIndex);
 }
 
 
@@ -274,27 +259,30 @@ void Timer(int value)
 
         enemyManager->move();
         enemyManager->updateBBoxes();
-        //moveEnemyShots();
 
         for(int i = 0; i < NUM_LASERS; i++)
         {
-            if(enemyLasers[i] != NULL)
-                enemyLasers[i]->update(msec);
-            else
+            if(enemyLasers[i] == NULL)
                 continue;
+
+            if(enemyLasers[i]->y < ENEMY_LASER_FLOOR)
+                destroyLaser(i);
 
             for(int j = 0; j < NUM_BUNKERS; j++)
             {
                 if(enemyLasers[i] != NULL && bunkers[j]->checkColision(enemyLasers[i]))
+                {
                     destroyLaser(i);
+                    break;
+                }
             }
 
-            if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
+            /*if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
             {
                 playerLives--;
                 std::cout << "PLAYER MORREU! FICOU COM " << playerLives << " vidas.\n";
                 destroyLaser(i);
-            }
+            }*/
         }
 
         if(playerBullet != NULL)
@@ -310,7 +298,7 @@ void Timer(int value)
                 destroyBullet();
         }
 
-        if(playerBullet != NULL && playerBullet->y > MISSING_CEILING)
+        if(playerBullet != NULL && playerBullet->y > PLAYER_LASER_CEILING)
             destroyBullet();
 
         if(gameLive && enemyManager->checkGameover())
@@ -332,8 +320,9 @@ void Timer(int value)
 
                 getRandomEnemy(laserPosition);
 
+                printf("NOVO LASER %d\n", i);
                 enemyLasers[i] = new Object(modelsManager->getModel("t1invaderlaser"), laserPosition[0], laserPosition[1], laserPosition[2]);
-                enemyLasers[i]->setVelocity(0, -0.1, 0);
+                enemyLasers[i]->setVelocity(0, -1, 0);
                 liveShots++;
 
                 glEnable(firstEnemyLight+i);
@@ -434,7 +423,7 @@ void init(void)
 
     glEnable(GL_LIGHTING);
     glEnable(GL_NORMALIZE);
-    //glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT0);
 
     glEnable(GL_LIGHT1);
     GLfloat intensidadeCor[4] = {0.2, 0.2, 0.2, 1.0};

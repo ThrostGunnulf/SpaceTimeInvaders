@@ -22,11 +22,11 @@ void Object::update(GLfloat delta)
     glPopMatrix();
 
     //Uncomment this section to display bounding boxes
-    /*glPushMatrix();
+    glPushMatrix();
     glScalef(sx, sy, sz);
     glTranslatef(0, 0, 1);
     model->drawBBox(x, y, sx, sy);
-    glPopMatrix();*/
+    glPopMatrix();
 }
 
 bool Object::checkCollision(Object* bullet)

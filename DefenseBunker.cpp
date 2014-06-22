@@ -136,7 +136,10 @@ bool DefenseBunker::checkColision(Object* bullet)
         for(int j=1; j <= nCols; j++)
             if(intactAt(i, j))
             {
-                bool collision = checkPointInclusion(bullet->model->x1, bullet->model->y1, i, j) || checkPointInclusion(bullet->model->x2, bullet->model->y2, i, j) || checkPointInclusion(bullet->model->x3, bullet->model->y3, i, j) || checkPointInclusion(bullet->model->x4, bullet->model->y4, i, j);
+                bool collision = checkPointInclusion(bullet->model->x1, bullet->model->y1, i, j)
+                        || checkPointInclusion(bullet->model->x2, bullet->model->y2, i, j)
+                        || checkPointInclusion(bullet->model->x3, bullet->model->y3, i, j)
+                        || checkPointInclusion(bullet->model->x4, bullet->model->y4, i, j);
 
                 if(collision)
                 {
