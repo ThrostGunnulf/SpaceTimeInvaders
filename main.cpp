@@ -15,9 +15,15 @@
 #define ZOOM_SPEED 1.2
 #define CAMERA_ROTATION_SPEED 100.0
 
+#define NUM_BUNKERS 3
 #define NUM_LASERS 3
 #define SHOT_FREQUENCY_MAX 10000000
 #define SHOT_FREQUENCY_MIN 3
+
+#define MISSING_CEILING 215
+
+#define LEFT_LIMIT -150
+#define RIGHT_LIMIT 150
 
 #define BLACK 0.0, 0.0, 0.0, 1.0
 
@@ -51,8 +57,8 @@ int score = 0;
 GLint fps = 60;
 GLfloat msec = 1.0/fps;
 bool isOrthoProj = false;
-GLfloat obsP[] = {0.0, 0.0, 0.0};
-GLfloat defaultObsP[] = {0.0, 50.0, 200.0};
+GLfloat obsP[] = {0.0, 50.0, 150.0};
+GLfloat defaultObsP[] = {0.0, 75.0, 150.0};
 GLfloat playerHorizontalMovement = 2.0;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
@@ -61,16 +67,18 @@ bool gameLive = true;
 bool keyState[256] = {false};
 bool specialKeyState[256] = {false};
 
+int playerLives = 3;
+
 Object* player = NULL;
 Object* playerBullet = NULL;
 Object* planet = NULL;
 Object* space = NULL;
 Object* enemyLasers[NUM_LASERS] = { NULL };
-unsigned int enemyLight = GL_LIGHT5;
+unsigned int firstEnemyLight = GL_LIGHT5;
 GLint liveShots = 0;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
-DefenseBunker* bunker1 = NULL;
+DefenseBunker* bunkers[NUM_BUNKERS] = { NULL };
 
 void drawScore(int x, int y)
 {
@@ -104,14 +112,16 @@ void drawObjects(void)
     }
 
     planet->update(msec);
-    bunker1->update(msec);
+
+    for(int i = 0; i < NUM_BUNKERS; i++)
+        bunkers[i]->update(msec);
 
     for(int i = 0; i < NUM_LASERS; i++)
     {
         if(enemyLasers[i] != NULL)
         {
             GLfloat enemyLightPos[4] = {enemyLasers[i]->x, enemyLasers[i]->y, enemyLasers[i]->z + 15, 1.0};
-            glLightfv(enemyLight+i, GL_POSITION, enemyLightPos);
+            glLightfv(firstEnemyLight+i, GL_POSITION, enemyLightPos);
 
             enemyLasers[i]->update(msec);
         }
@@ -212,6 +222,11 @@ void keyOperations(void)
     else if(specialKeyState[GLUT_KEY_RIGHT])
         player->setVelocity(playerHorizontalMovement, 0, 0);
 
+    if(player->x < LEFT_LIMIT)
+        player->x = LEFT_LIMIT;
+    else if(player->x > RIGHT_LIMIT)
+        player->x = RIGHT_LIMIT;
+
     if((!specialKeyState[GLUT_KEY_LEFT] && !specialKeyState[GLUT_KEY_RIGHT]) ||
             (specialKeyState[GLUT_KEY_LEFT] && specialKeyState[GLUT_KEY_RIGHT]))
         player->setVelocity(0, 0, 0);
@@ -220,24 +235,19 @@ void keyOperations(void)
 void destroyBullet()
 {
     glDisable(GL_LIGHT4);
-
-    std::cout << "DEBUG: Bullet destroyed\n";
     delete playerBullet;
     playerBullet = NULL;
 }
 
-void moveEnemyShots()
+/*void moveEnemyShots()
 {
     for(int i = 0; i < NUM_LASERS; i++)
     {
         if(enemyLasers[i] != NULL)
         {
-            bool collided = checkEnemyShotCollision(i);
+            enemyLasers[i]->model->updateBBox(enemyLasers[i]->x, enemyLasers[i]->y);
 
-            if(collided || enemyLasers[i]->y < -100)
-                destroyLaser(i);
-            else
-                enemyLasers[i]->setVelocity(0, -1, 0);
+
         }
     }
 }
@@ -245,11 +255,11 @@ void moveEnemyShots()
 bool checkEnemyShotCollision(int shotIndex)
 {
     return false;
-}
+}*/
 
 void destroyLaser(int laserIndex)
 {
-    glDisable(enemyLight+laserIndex);
+    glDisable(firstEnemyLight+laserIndex);
     delete enemyLasers[laserIndex];
     enemyLasers[laserIndex] = NULL;
     liveShots--;
@@ -264,7 +274,28 @@ void Timer(int value)
 
         enemyManager->move();
         enemyManager->updateBBoxes();
-        moveEnemyShots();
+        //moveEnemyShots();
+
+        for(int i = 0; i < NUM_LASERS; i++)
+        {
+            if(enemyLasers[i] != NULL)
+                enemyLasers[i]->update(msec);
+            else
+                continue;
+
+            for(int j = 0; j < NUM_BUNKERS; j++)
+            {
+                if(enemyLasers[i] != NULL && bunkers[j]->checkColision(enemyLasers[i]))
+                    destroyLaser(i);
+            }
+
+            if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
+            {
+                playerLives--;
+                std::cout << "PLAYER MORREU! FICOU COM " << playerLives << " vidas.\n";
+                destroyLaser(i);
+            }
+        }
 
         if(playerBullet != NULL)
         {
@@ -272,10 +303,14 @@ void Timer(int value)
             Object* tempBullet = playerBullet;
             score += enemyManager->checkCollision(tempBullet);
         }
-        if(playerBullet && bunker1->checkColision(playerBullet))
-            destroyBullet();
 
-        if(playerBullet != NULL && playerBullet->y > 1.2*yC)
+        for(int j = 0; j < NUM_BUNKERS; j++)
+        {
+            if(playerBullet && bunkers[j]->checkColision(playerBullet))
+                destroyBullet();
+        }
+
+        if(playerBullet != NULL && playerBullet->y > MISSING_CEILING)
             destroyBullet();
 
         if(gameLive && enemyManager->checkGameover())
@@ -298,25 +333,28 @@ void Timer(int value)
                 getRandomEnemy(laserPosition);
 
                 enemyLasers[i] = new Object(modelsManager->getModel("t1invaderlaser"), laserPosition[0], laserPosition[1], laserPosition[2]);
+                enemyLasers[i]->setVelocity(0, -0.1, 0);
                 liveShots++;
 
-                glEnable(enemyLight+i);
+                glEnable(firstEnemyLight+i);
                 GLfloat enemyLaserIntensity[4] = {255, 0, 0, 1};
                 GLfloat enemyLightPos[4] = {enemyLasers[i]->x, enemyLasers[i]->y, enemyLasers[i]->z, 1.0};
-                glLightfv(enemyLight+i,GL_POSITION,				enemyLightPos);
-                glLightfv(enemyLight+i,GL_AMBIENT,					enemyLaserIntensity);
-                glLightfv(enemyLight+i,GL_DIFFUSE,					enemyLaserIntensity);
-                glLightfv(enemyLight+i,GL_SPECULAR,				enemyLaserIntensity);
-                glLightf(enemyLight+i,GL_CONSTANT_ATTENUATION,	    1);
-                glLightf(enemyLight+i,GL_LINEAR_ATTENUATION,		0.5);
-                glLightf(enemyLight+i,GL_QUADRATIC_ATTENUATION,	0.5);
-                glLightf(enemyLight+i,GL_SPOT_EXPONENT,			0.1);
+                glLightfv(firstEnemyLight+i,GL_POSITION,				enemyLightPos);
+                glLightfv(firstEnemyLight+i,GL_AMBIENT,					enemyLaserIntensity);
+                glLightfv(firstEnemyLight+i,GL_DIFFUSE,					enemyLaserIntensity);
+                glLightfv(firstEnemyLight+i,GL_SPECULAR,				enemyLaserIntensity);
+                glLightf(firstEnemyLight+i,GL_CONSTANT_ATTENUATION,	    1);
+                glLightf(firstEnemyLight+i,GL_LINEAR_ATTENUATION,		0.5);
+                glLightf(firstEnemyLight+i,GL_QUADRATIC_ATTENUATION,	0.5);
+                glLightf(firstEnemyLight+i,GL_SPOT_EXPONENT,			0.1);
             }
         }
     }
 
     if(!gameLive && keyState[' '])
     {
+        keyState[' '] = false;
+
         gameLive = true;
         if(playerBullet != NULL)
         {
@@ -326,7 +364,7 @@ void Timer(int value)
 
         if(enemyManager != NULL)
             delete enemyManager;
-        enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
+        enemyManager = new EnemyManager(modelsManager, 100, 0.25, 20);
         if(player != NULL)
             delete player;
         player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
@@ -339,6 +377,9 @@ void Timer(int value)
             delete enemyLasers[i];
             enemyLasers[i] = NULL;
         }
+
+        for(int i = 0; i < NUM_BUNKERS; i++)
+            bunkers[i]->reset();
     }
 
     glutPostRedisplay();
@@ -347,9 +388,6 @@ void Timer(int value)
 
 int main(int argc, char** argv)
 {
-    printf("GL_MAX_LIGHTS = %d\n(please remove me later, I'm in main)\n", (int) GL_MAX_LIGHTS);
-    printf("VALOR DA ENEMYLIGHT INICIAL = %u (print in main)\n", enemyLight);
-
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(screenWidth, screenHeight);
@@ -397,10 +435,9 @@ void init(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_NORMALIZE);
     //glEnable(GL_LIGHT0);
-    GLfloat intensidadeCor[4] = {0.30, 0.30, 0.30, 1.0};
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, intensidadeCor);
 
     glEnable(GL_LIGHT1);
+    GLfloat intensidadeCor[4] = {0.2, 0.2, 0.2, 1.0};
     GLfloat direccao[] = {0, 5, -10, 0};
     GLfloat posicaoLuz[] = {0, 5, 3, 1};
     glLightfv(GL_LIGHT1,GL_POSITION,				posicaoLuz);
@@ -417,7 +454,7 @@ void init(void)
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-    enemyManager = new EnemyManager(modelsManager, 50, 0.25, 20);
+    enemyManager = new EnemyManager(modelsManager, 100, 0.25, 20);
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(1, 1, 1);
@@ -427,7 +464,9 @@ void init(void)
     space = new Object(modelsManager->getModel("skybox"), 0, 0, 0);
     space->setScale(1250, 1250, 1250);
 
-    bunker1 = new DefenseBunker(0, 30, 0, 3, 3, 12);
+    bunkers[0] = new DefenseBunker(-85, 30, 0, 3, 3, 12);
+    bunkers[1] = new DefenseBunker(0, 30, 0, 3, 3, 12);
+    bunkers[2] = new DefenseBunker(85, 30, 0, 3, 3, 12);
 }
 
 void display(void)
@@ -442,12 +481,13 @@ void display(void)
     if(isOrthoProj)
         glOrtho(-xC, xC, -yC, yC, -zC, zC);
     else
-        gluPerspective(90.0, screenWidth/(GLfloat)screenHeight, 0.01, 10*zC);
+        gluPerspective(90.0, screenWidth/(GLfloat)screenHeight, 0.01, 20*zC);
 
     //View
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(obsP[0], obsP[1], obsP[2], 0,0,0, 0, 1, 0);
+
+    gluLookAt(obsP[0], obsP[1], obsP[2], 0,defaultObsP[1],0, 0, 1, 0);
 
     //Update and draw stuff
     if(gameLive)
@@ -570,7 +610,7 @@ void mouseClickEvent(int button, int state, int x, int y)
 void updateObsP()
 {
     obsP[0] = r * sin(angleX0Z);
-    obsP[1] = r * sin(angleX0Y);
+    obsP[1] = defaultObsP[1] + r * sin(angleX0Y);
     obsP[2] = r * cos(angleX0Z) * cos(angleX0Y);
 }
 

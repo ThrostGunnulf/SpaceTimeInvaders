@@ -18,6 +18,8 @@ public:
 	void translate(GLfloat dx, GLfloat dy, GLfloat dz);
 	void setScale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ);
     GLfloat getVelX();
+    virtual bool checkCollision(Object*);
+    virtual bool checkPointInclusion(GLfloat, GLfloat);
 
 protected:
     GLfloat velX, velY, velZ, angle, dangle, ax, ay, az;

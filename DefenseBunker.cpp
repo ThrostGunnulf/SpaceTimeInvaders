@@ -10,7 +10,8 @@ DefenseBunker::DefenseBunker(GLfloat _x, GLfloat _y, GLfloat _z, GLfloat _width,
     height = _height;
     depth = _depth;
 
-    loadIntactMatrix("models" + DIRSYMBOL + "DefenseBunker.txt");
+    matrixFileName = "models" + DIRSYMBOL + "DefenseBunker.txt";
+    loadIntactMatrix(matrixFileName);
 
     halfWidth = width * nRows / 2.0;
     halfHeight = height * nCols / 2.0;
@@ -56,7 +57,7 @@ void DefenseBunker::update(GLfloat delta)
     glScalef(sx, sy, sz);
     glTranslatef(-halfWidth, -halfHeight, halfDepth);
 
-    GLfloat origX = 0, origY;
+    GLfloat origX = 0, origY = 0;
     for(int i=1; i <= nRows; i++, origY += height)
     {
         origX = 0;
@@ -182,13 +183,18 @@ void DefenseBunker::loadIntactMatrix(std::string dataFile)
             matrixFile >> intactMatrix[i * nCols + j];
 
     //DEBUG
-    for(int i=1; i <= nRows; i++)
+    /*for(int i=1; i <= nRows; i++)
     {
         for(int j=1; j <= nCols; j++)
             printf("%d ", intactMatrix[i * nCols + j]);
         printf("\n");
-    }
+    }*/
 
 
     matrixFile.close();
+}
+
+void DefenseBunker::reset(void)
+{
+    loadIntactMatrix(matrixFileName);
 }

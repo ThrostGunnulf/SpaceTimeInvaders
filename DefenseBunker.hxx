@@ -17,8 +17,11 @@ public:
     void update(GLfloat delta);
     bool checkColision(Object* bullet);
     bool checkPointInclusion(GLfloat bulletX, GLfloat bulletY, int row, int col);
+    void reset(void);
 
 private:
+    std::string matrixFileName;
+
     inline bool intactAt(int row, int col);
     void loadIntactMatrix(std::string dataFile);
 };

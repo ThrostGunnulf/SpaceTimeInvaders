@@ -174,8 +174,6 @@ int EnemyManager::checkCollision(Object*& bullet)
 
                     points = 10*(1 + i/2);
 
-                    std::cout << "DEBUG: Enemy hit, worth " << points << " points\n";
-
                     return points;
                 }
             }

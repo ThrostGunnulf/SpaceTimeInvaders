@@ -29,6 +29,29 @@ void Object::update(GLfloat delta)
     glPopMatrix();*/
 }
 
+bool Object::checkCollision(Object* bullet)
+{
+    model->updateBBox(x, y);
+
+    if(checkPointInclusion(bullet->model->x1, bullet->model->y1) || checkPointInclusion(bullet->model->x2, bullet->model->y2) ||
+            checkPointInclusion(bullet->model->x3, bullet->model->y3) || checkPointInclusion(bullet->model->x4, bullet->model->y4))
+        return true;
+
+    return false;
+}
+
+bool Object::checkPointInclusion(GLfloat bulletX, GLfloat bulletY)
+{
+    if(bulletX >= model->x1 && bulletX <= model->x3)
+    {
+        if(bulletY >= model-> y2 && bulletY <= model->y1)
+            return true;
+    }
+
+    return false;
+}
+
+
 void Object::translate(GLfloat dx, GLfloat dy, GLfloat dz)
 {
 	x += dx;
