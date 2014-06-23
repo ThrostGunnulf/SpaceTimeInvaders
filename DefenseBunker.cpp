@@ -25,14 +25,10 @@ void DefenseBunker::assignTexture(std::string dir, std::string name)
     glGenTextures(1, &texId);
     glBindTexture(GL_TEXTURE_2D, texId);
 
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-    imag.LoadBmpFile((dir + name + ".bmp").c_str());
+    imag.LoadBmpFile((dir + DIRSYMBOL + name + ".bmp").c_str());
     glTexImage2D(GL_TEXTURE_2D, 0, 3,
                  imag.GetNumCols(),
                  imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
@@ -41,7 +37,15 @@ void DefenseBunker::assignTexture(std::string dir, std::string name)
 
 void DefenseBunker::update(GLfloat delta)
 {
-    glColor3f(1.0, 0.0, 0.0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texId);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
     angle += dangle;
     normalizeAngle();
@@ -68,10 +72,16 @@ void DefenseBunker::update(GLfloat delta)
             glBegin(GL_QUADS);
             glNormal3f(0, 0, 1);
 
-            //glTexCoord2f(texPoints[iT][0], texPoints[iT][1]);
+            glTexCoord2f(0.0, 1.0);
             glVertex3f(origX, origY + height, 0.0);
+
+            glTexCoord2f(0.0, 0.0);
             glVertex3f(origX, origY, 0.0);
+
+            glTexCoord2f(1.0, 0.0);
             glVertex3f(origX + width, origY, 0.0);
+
+            glTexCoord2f(1.0, 1.0);
             glVertex3f(origX + width, origY + height, 0.0);
             glEnd();
 
@@ -79,9 +89,16 @@ void DefenseBunker::update(GLfloat delta)
             glBegin(GL_QUADS);
             glNormal3f(0, 0, -1);
 
+            glTexCoord2f(0.0, 1.0);
             glVertex3f(origX + width, origY + height, -depth);
+
+            glTexCoord2f(0.0, 0.0);
             glVertex3f(origX + width, origY, -depth);
+
+            glTexCoord2f(1.0, 0.0);
             glVertex3f(origX, origY, -depth);
+
+            glTexCoord2f(1.0, 1.0);
             glVertex3f(origX, origY + height, -depth);
             glEnd();
 
@@ -91,9 +108,16 @@ void DefenseBunker::update(GLfloat delta)
                 glBegin(GL_QUADS);
                 glNormal3f(-1, 0, 0);
 
+                glTexCoord2f(0.0, 1.0);
                 glVertex3f(origX, origY + height, -depth);
+
+                glTexCoord2f(0.0, 0.0);
                 glVertex3f(origX, origY, -depth);
+
+                glTexCoord2f(1.0, 0.0);
                 glVertex3f(origX, origY, 0);
+
+                glTexCoord2f(1.0, 1.0);
                 glVertex3f(origX, origY + height, 0);
                 glEnd();
             }
@@ -103,9 +127,16 @@ void DefenseBunker::update(GLfloat delta)
                 glBegin(GL_QUADS);
                 glNormal3f(1, 0, 0);
 
+                glTexCoord2f(0.0, 1.0);
                 glVertex3f(origX + width, origY + height, 0);
+
+                glTexCoord2f(0.0, 0.0);
                 glVertex3f(origX + width, origY, 0);
+
+                glTexCoord2f(1.0, 0.0);
                 glVertex3f(origX + width, origY, -depth);
+
+                glTexCoord2f(1.0, 1.0);
                 glVertex3f(origX + width, origY + height, -depth);
                 glEnd();
             }
@@ -116,9 +147,16 @@ void DefenseBunker::update(GLfloat delta)
                 glBegin(GL_QUADS);
                 glNormal3f(0, -1, 0);
 
+                glTexCoord2f(0.0, 1.0);
                 glVertex3f(origX, origY, 0);
+
+                glTexCoord2f(0.0, 0.0);
                 glVertex3f(origX, origY, -depth);
+
+                glTexCoord2f(1.0, 0.0);
                 glVertex3f(origX + width, origY, -depth);
+
+                glTexCoord2f(1.0, 1.0);
                 glVertex3f(origX + width, origY, 0);
                 glEnd();
             }
@@ -128,9 +166,16 @@ void DefenseBunker::update(GLfloat delta)
                 glBegin(GL_QUADS);
                 glNormal3f(0, 1, 0);
 
+                glTexCoord2f(0.0, 1.0);
                 glVertex3f(origX, origY + height, -depth);
+
+                glTexCoord2f(0.0, 0.0);
                 glVertex3f(origX, origY + height, 0);
+
+                glTexCoord2f(0.0, 1.0);
                 glVertex3f(origX + width, origY + height, 0);
+
+                glTexCoord2f(1.0, 1.0);
                 glVertex3f(origX + width, origY + height, -depth);
                 glEnd();
             }
@@ -138,6 +183,7 @@ void DefenseBunker::update(GLfloat delta)
     }
 
     glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 }
 
 

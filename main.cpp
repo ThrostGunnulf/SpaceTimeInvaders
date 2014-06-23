@@ -473,6 +473,8 @@ void init(void)
     bunkers[1] = new DefenseBunker(0, 30, 0, 3, 3, 12);
     bunkers[2] = new DefenseBunker(85, 30, 0, 3, 3, 12);
 
+    for(int i=0; i < NUM_BUNKERS; i++)
+        bunkers[i]->assignTexture("models", "DefenseBunker");
 
     for(int i=0; i < NUM_LASERS; i++)
         enemyLasers[i] = NULL;
