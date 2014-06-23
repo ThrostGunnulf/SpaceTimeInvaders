@@ -42,8 +42,6 @@ void DefenseBunker::assignTexture(std::string dir, std::string name)
 void DefenseBunker::update(GLfloat delta)
 {
     glColor3f(1.0, 0.0, 0.0);
-    glDisable(GL_LIGHTING); //DEBUG
-    glDisable(GL_CULL_FACE);
 
     angle += dangle;
     normalizeAngle();
@@ -66,14 +64,21 @@ void DefenseBunker::update(GLfloat delta)
             if(!intactAt(i, j))
                 continue;
 
+            //Draw front wall
             glBegin(GL_QUADS);
+            glNormal3f(0, 0, 1);
+
+            //glTexCoord2f(texPoints[iT][0], texPoints[iT][1]);
             glVertex3f(origX, origY + height, 0.0);
             glVertex3f(origX, origY, 0.0);
             glVertex3f(origX + width, origY, 0.0);
             glVertex3f(origX + width, origY + height, 0.0);
             glEnd();
 
+            //draw back wall
             glBegin(GL_QUADS);
+            glNormal3f(0, 0, -1);
+
             glVertex3f(origX + width, origY + height, -depth);
             glVertex3f(origX + width, origY, -depth);
             glVertex3f(origX, origY, -depth);
@@ -84,6 +89,8 @@ void DefenseBunker::update(GLfloat delta)
             if(!intactAt(i, j -1))
             {
                 glBegin(GL_QUADS);
+                glNormal3f(-1, 0, 0);
+
                 glVertex3f(origX, origY + height, -depth);
                 glVertex3f(origX, origY, -depth);
                 glVertex3f(origX, origY, 0);
@@ -94,6 +101,8 @@ void DefenseBunker::update(GLfloat delta)
             if(!intactAt(i, j +1))
             {
                 glBegin(GL_QUADS);
+                glNormal3f(1, 0, 0);
+
                 glVertex3f(origX + width, origY + height, 0);
                 glVertex3f(origX + width, origY, 0);
                 glVertex3f(origX + width, origY, -depth);
@@ -105,6 +114,8 @@ void DefenseBunker::update(GLfloat delta)
             if(!intactAt(i -1, j))
             {
                 glBegin(GL_QUADS);
+                glNormal3f(0, -1, 0);
+
                 glVertex3f(origX, origY, 0);
                 glVertex3f(origX, origY, -depth);
                 glVertex3f(origX + width, origY, -depth);
@@ -115,6 +126,8 @@ void DefenseBunker::update(GLfloat delta)
             if(!intactAt(i +1, j))
             {
                 glBegin(GL_QUADS);
+                glNormal3f(0, 1, 0);
+
                 glVertex3f(origX, origY + height, -depth);
                 glVertex3f(origX, origY + height, 0);
                 glVertex3f(origX + width, origY + height, 0);
@@ -125,8 +138,6 @@ void DefenseBunker::update(GLfloat delta)
     }
 
     glPopMatrix();
-
-    glEnable(GL_LIGHTING); //DEBUG
 }
 
 
