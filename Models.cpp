@@ -72,28 +72,9 @@ void Model::draw()
     glDisable(GL_TEXTURE_2D);
 }
 
-void Model::drawBBox(GLfloat _x, GLfloat _y, GLfloat _sx, GLfloat _sy)
-{
-    updateBBox(_x, _y);
-
-    glBegin(GL_QUADS);
-    {
-        glVertex3f(x1, y1, 0);
-        glVertex3f(x2, y2, 0);
-        glVertex3f(x3, y3, 0);
-        glVertex3f(x4, y4, 0);
-    }
-    glEnd();
-}
-
 void Model::assignTexture(GLuint id)
 {
     texId = id;
-}
-
-void Model::assignMaterial(Material* mat)
-{
-    material = mat;
 }
 
 void Model::createBBox(GLfloat _height, GLfloat _width)
@@ -102,12 +83,9 @@ void Model::createBBox(GLfloat _height, GLfloat _width)
     width = _width;
 }
 
-void Model::updateBBox(GLfloat x, GLfloat y)
+void Model::assignMaterial(Material* mat)
 {
-    x1 = x2 = x - (width / 2);
-    x3 = x4 = x + (width / 2);
-    y1 = y4 = y + height;
-    y2 = y3 = y;
+    material = mat;
 }
 
 Model::~Model()

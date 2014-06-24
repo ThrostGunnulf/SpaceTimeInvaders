@@ -16,9 +16,9 @@
 #define CAMERA_ROTATION_SPEED 100.0
 
 #define NUM_BUNKERS 3
-#define NUM_LASERS 1
+#define NUM_LASERS 5
 #define SHOT_FREQUENCY_MAX 10000000
-#define SHOT_FREQUENCY_MIN 1000
+#define SHOT_FREQUENCY_MIN 100000
 
 #define PLAYER_LASER_CEILING 215
 #define ENEMY_LASER_FLOOR -100
@@ -143,7 +143,7 @@ void drawObjects(void)
             glLightfv(firstEnemyLight+i, GL_POSITION, enemyLightPos);
 
             enemyLasers[i]->update(msec);
-            enemyLasers[i]->model->updateBBox(enemyLasers[i]->x, enemyLasers[i]->y);
+            enemyLasers[i]->updateBBox();
 
             //Uncomment this section to display laser numbers
             /*glDisable(GL_LIGHTING);
@@ -373,29 +373,15 @@ void Timer(int value)
         enemyManager->move();
         enemyManager->updateBBoxes();
 
-        //printf("TESTING COLLISIONS\n");
         for(int i = 0; i < NUM_LASERS; i++)
         {
-            //printf("[%d] %p\n", i, enemyLasers[i]);
-
             if(enemyLasers[i] == NULL)
                 continue;
 
-            if(enemyLasers[i]->y < ENEMY_LASER_FLOOR)
-            {
-                destroyLaser(i);
-                continue;
-            }
+            enemyLasers[i]->updateBBox();
 
-            if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
-            {
-                playerLives--;
-                std::cout << "PLAYER MORREU! FICOU COM " << playerLives << " vidas.\nCenas" << enemyLasers[i]->model->y1 << "\n" << enemyLasers[i]->model->y2 << "\n";
+            if(enemyLasers[i]->y < ENEMY_LASER_FLOOR)
                 destroyLaser(i);
-                player->x = 0;
-                if(playerLives < 0)
-                    gameLive = false;
-            }
 
             for(int j = 0; j < NUM_BUNKERS; j++)
             {
@@ -405,12 +391,22 @@ void Timer(int value)
                     break;
                 }
             }
+
+            if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
+            {
+                playerLives--;
+                std::cout << "PLAYER MORREU! FICOU COM " << playerLives << " vidas.\nCenas" << enemyLasers[i]->y1 << "\n" << enemyLasers[i]->y2 << "\n";
+                destroyLaser(i);
+                player->x = 0;
+                if(playerLives < 0)
+                    gameLive = false;
+            }
         }
         //printf("\n");
 
         if(playerBullet != NULL)
         {
-            playerBullet->model->updateBBox(playerBullet->x, playerBullet->y);
+            playerBullet->updateBBox();
             Object* tempBullet = playerBullet;
             score += enemyManager->checkCollision(tempBullet);
         }
@@ -431,11 +427,15 @@ void Timer(int value)
         if(liveShots < NUM_LASERS && rng < SHOT_FREQUENCY_MIN)
         {
             int i;
-            for(i = 0; i < NUM_LASERS && enemyLasers[i]; i++);
+            for(i = 0; i < NUM_LASERS; i++)
+            {
+                if(enemyLasers[i] == NULL)
+                    break;
+            }
 
             if(i < NUM_LASERS)
             {
-                GLfloat laserPosition[] = {0.0, 0.0, 0.0};
+                GLfloat* laserPosition = new GLfloat[3];
 
                 getRandomEnemy(laserPosition);
 
@@ -523,6 +523,7 @@ int main(int argc, char** argv)
     glutMotionFunc(mouseDragEvent);
 
     glutTimerFunc(msec, Timer, 0);
+
     glutMainLoop();
 
     destroyObjects();

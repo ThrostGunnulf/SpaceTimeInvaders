@@ -29,7 +29,7 @@ struct Model
 {
     int numVertex, numNormals, numTexPoints, numFaces;
     int** faces;
-    float height, width, x1, x2, x3, x4, y1, y2, y3, y4;
+    GLfloat height, width;
     float **vertex, **normals, **texPoints;
     unsigned int textureMode, hWrap, vWrap;
 
@@ -40,8 +40,6 @@ struct Model
     void assignTexture(GLuint id);
     void assignMaterial(Material* mat);
     void createBBox(GLfloat _height, GLfloat _width);
-    void updateBBox(GLfloat x, GLfloat y);
-    void drawBBox(GLfloat _x, GLfloat _y, GLfloat _sx, GLfloat _sy);
     void setTextureEnvironment(void);
 
 private:

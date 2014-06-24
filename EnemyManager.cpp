@@ -137,7 +137,7 @@ int EnemyManager::checkCollision(Object*& bullet)
             if(enemyMatrix[i][j] == NULL)
                 continue;
 
-            enemyMatrix[i][j]->model->updateBBox(enemyMatrix[i][j]->x, enemyMatrix[i][j]->y);
+            enemyMatrix[i][j]->updateBBox();
 
             for(int l = 0; l < 4; l++)
             {
@@ -145,22 +145,22 @@ int EnemyManager::checkCollision(Object*& bullet)
                 {
                 case 0:
                 {
-                    answer = checkPointInclusion(bullet->model->x1, bullet->model->y1, enemyMatrix[i][j]);
+                    answer = checkPointInclusion(bullet->x1, bullet->y1, enemyMatrix[i][j]);
                     break;
                 }
                 case 1:
                 {
-                    answer = checkPointInclusion(bullet->model->x2, bullet->model->y2, enemyMatrix[i][j]);
+                    answer = checkPointInclusion(bullet->x2, bullet->y2, enemyMatrix[i][j]);
                     break;
                 }
                 case 2:
                 {
-                    answer = checkPointInclusion(bullet->model->x3, bullet->model->y3, enemyMatrix[i][j]);
+                    answer = checkPointInclusion(bullet->x3, bullet->y3, enemyMatrix[i][j]);
                     break;
                 }
                 default:
                 {
-                    answer = checkPointInclusion(bullet->model->x4, bullet->model->y4, enemyMatrix[i][j]);
+                    answer = checkPointInclusion(bullet->x4, bullet->y4, enemyMatrix[i][j]);
                     break;
                 }
                 }
@@ -187,9 +187,9 @@ int EnemyManager::checkCollision(Object*& bullet)
 
 bool EnemyManager::checkPointInclusion(GLfloat bulletX, GLfloat bulletY, Object* enemy)
 {
-    if(bulletX >= enemy->model->x1 && bulletX <= enemy->model->x3)
+    if(bulletX >= enemy->x1 && bulletX <= enemy->x3)
     {
-        if(bulletY >= enemy->model-> y2 && bulletY <= enemy->model->y1)
+        if(bulletY >= enemy->y2 && bulletY <= enemy->y1)
             return true;
     }
 
@@ -204,7 +204,7 @@ void EnemyManager::updateBBoxes()
         for(int j = 0; j < ENEMYCOLUMNS; j++)
         {
             if(enemyMatrix[i][j] != NULL)
-                enemyMatrix[i][j]->model->updateBBox(enemyMatrix[i][j]->x, enemyMatrix[i][j]->y);
+                enemyMatrix[i][j]->updateBBox();
         }
     }
 }

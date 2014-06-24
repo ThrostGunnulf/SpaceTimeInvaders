@@ -8,6 +8,7 @@ class Object
 {
 public:
     GLfloat x, y, z, sx, sy, sz;
+    GLfloat width, height, x1, x2, x3, x4, y1, y2, y3, y4;
     Model* model;
     Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z);
     virtual ~Object() {}
@@ -20,6 +21,8 @@ public:
     GLfloat getVelX();
     virtual bool checkCollision(Object*);
     virtual bool checkPointInclusion(GLfloat, GLfloat);
+    void updateBBox();
+    void drawBBox(GLfloat _x, GLfloat _y);
 
 protected:
     GLfloat velX, velY, velZ, angle, dangle, ax, ay, az;

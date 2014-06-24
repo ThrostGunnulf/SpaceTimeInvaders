@@ -5,6 +5,12 @@
 Object::Object(Model* _model, GLfloat _x, GLfloat _y, GLfloat _z) : x(_x), y(_y), z(_z), sx(1), sy(1), sz(1), velX(0), velY(0), velZ(0), angle(0), dangle(0), ax(0), ay(0), az(0)
 {
     model = _model;
+
+    if(model != NULL)
+    {
+        width = model->width;
+        height = model->height;
+    }
 }
 
 void Object::update(GLfloat delta)
@@ -21,20 +27,24 @@ void Object::update(GLfloat delta)
 		model->draw();
     glPopMatrix();
 
-    //Uncomment this section to display bounding boxes
-    /*glPushMatrix();
+#define DRAW_BBS  //Uncomment this to display bounding boxes
+#ifdef DRAW_BBS
+    glPushMatrix();
     glScalef(sx, sy, sz);
     glTranslatef(0, 0, 1);
-    model->drawBBox(x, y, sx, sy);
-    glPopMatrix();*/
+    drawBBox(x, y);
+    glPopMatrix();
+#endif
 }
 
 bool Object::checkCollision(Object* bullet)
 {
-    model->updateBBox(x, y);
+    updateBBox();
 
-    if(checkPointInclusion(bullet->model->x1, bullet->model->y1) || checkPointInclusion(bullet->model->x2, bullet->model->y2) ||
-            checkPointInclusion(bullet->model->x3, bullet->model->y3) || checkPointInclusion(bullet->model->x4, bullet->model->y4))
+    if(checkPointInclusion(bullet->x1, bullet->y1)
+            || checkPointInclusion(bullet->x2, bullet->y2)
+            || checkPointInclusion(bullet->x3, bullet->y3)
+            || checkPointInclusion(bullet->x4, bullet->y4))
         return true;
 
     return false;
@@ -42,9 +52,9 @@ bool Object::checkCollision(Object* bullet)
 
 bool Object::checkPointInclusion(GLfloat bulletX, GLfloat bulletY)
 {
-    if(bulletX >= model->x1 && bulletX <= model->x3)
+    if(bulletX >= x1 && bulletX <= x3)
     {
-        if(bulletY >= model-> y2 && bulletY <= model->y1)
+        if(bulletY >= y2 && bulletY <= y1)
             return true;
     }
 
@@ -87,7 +97,34 @@ void Object::setScale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ)
 {
 	sx = scaleX;
 	sy = scaleY;
-	sz = scaleZ;
+    sz = scaleZ;
+
+    width = model->width * sx;
+    height = model->height * sy;
+}
+
+void Object::updateBBox()
+{
+    //std::cout <<"(X, Y) = ("<< x <<", "<< y <<")\n";
+
+    x1 = x2 = x - (width / 2);
+    x3 = x4 = x + (width / 2);
+    y1 = y4 = y + height;
+    y2 = y3 = y;
+}
+
+void Object::drawBBox(GLfloat _x, GLfloat _y)
+{
+    updateBBox();
+
+    glBegin(GL_QUADS);
+    {
+        glVertex3f(x1, y1, 0);
+        glVertex3f(x2, y2, 0);
+        glVertex3f(x3, y3, 0);
+        glVertex3f(x4, y4, 0);
+    }
+    glEnd();
 }
 
 GLfloat Object::getVelX()
