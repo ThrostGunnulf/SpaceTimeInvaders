@@ -45,6 +45,7 @@ void drawScore(int, int);
 void destroyBullet();
 void destroyObjects();
 void drawHUD();
+void drawLoading(void);
 void drawLives(int, int);
 void updateObsP();
 void moveEnemyShots();
@@ -176,6 +177,60 @@ void drawHUD()
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
+}
+
+void drawLoading(void)
+{
+    //Clear buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, screenWidth, screenHeight);
+
+    //Projection
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, screenWidth, 0, screenHeight, -zC, zC);
+
+    //View
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    //Load loading texture
+    GLuint texId;
+    RgbImage imag;
+
+    glGenTextures(1, &texId);
+    glBindTexture(GL_TEXTURE_2D, texId);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+    imag.LoadBmpFile(("models"+ DIRSYMBOL + "nowloading.bmp").c_str());
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+    imag.GetNumCols(),
+        imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+        imag.ImageData());
+
+    //Draw loading texture
+    glColor3f(0.0, 1.0, 1.0); //DEBUG
+    glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 1);
+    glVertex3f(0, screenHeight, 0);
+    glTexCoord2f(0, 0);
+    glVertex3f(0, 0, 0);
+    glTexCoord2f(1, 0);
+    glVertex3f(screenWidth, 0, 0);
+    glTexCoord2f(1, 1);
+    glVertex3f(screenWidth, screenHeight, 0);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+
+    //Swap Buffers
+    glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 void drawGameover()
@@ -490,6 +545,10 @@ void init(void)
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
 
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+
+    drawLoading();
+
     glEnable(GL_LIGHTING);
     glEnable(GL_NORMALIZE);
     //glEnable(GL_LIGHT0);
@@ -509,7 +568,6 @@ void init(void)
     glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,			direccao);
     glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,			32.0);
 
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
     enemyManager = new EnemyManager(modelsManager, 100, 0.25, 20);
