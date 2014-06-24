@@ -18,10 +18,11 @@
 #define NUM_BUNKERS 3
 #define NUM_LASERS 3
 #define SHOT_FREQUENCY_MAX 10000000
-#define SHOT_FREQUENCY_MIN 100000
+#define SHOT_FREQUENCY_MIN 1000
 
-#define PLAYER_LASER_CEILING 215
-#define ENEMY_LASER_FLOOR -100
+#define PLAYER_LASER_CEILING 250
+#define ENEMY_LASER_FLOOR -75
+#define ENEMY_STARTING_HEIGHT 135
 
 #define LEFT_LIMIT -150
 #define RIGHT_LIMIT 150
@@ -61,8 +62,8 @@ GLint fps = 60;
 GLfloat msec = 3.0; //1.0/fps;
 bool paused = false;
 bool isOrthoProj = false;
-GLfloat obsP[] = {0.0, 50.0, 150.0};
-GLfloat defaultObsP[] = {0.0, 75.0, 150.0};
+GLfloat obsP[] = {0.0, 115.0, 150.0};
+GLfloat defaultObsP[] = {0.0, 115.0, 150.0};
 GLfloat playerHorizontalMovement = 2.0;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
@@ -557,7 +558,7 @@ void Timer(int value)
 
         if(enemyManager != NULL)
             delete enemyManager;
-        enemyManager = new EnemyManager(modelsManager, 100, 0.25, 20);
+        enemyManager = new EnemyManager(modelsManager, ENEMY_STARTING_HEIGHT, 0.25, 20);
         if(player != NULL)
             delete player;
         player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
@@ -650,7 +651,7 @@ void init(void)
 
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-    enemyManager = new EnemyManager(modelsManager, 100, 0.25, 20);
+    enemyManager = new EnemyManager(modelsManager, ENEMY_STARTING_HEIGHT, 0.25, 20);
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(1, 1, 1);

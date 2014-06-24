@@ -28,4 +28,5 @@ private:
     GLint currentY;
     GLfloat currentSpeed, dBetweenEnemies;
     bool goingRight;
+    int liveEnemies;
 };

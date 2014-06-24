@@ -27,7 +27,7 @@ void Object::update(GLfloat delta)
 		model->draw();
     glPopMatrix();
 
-#define DRAW_BBS  //Uncomment this to display bounding boxes
+//#define DRAW_BBS  //Uncomment this to display bounding boxes
 #ifdef DRAW_BBS
     glPushMatrix();
     glScalef(sx, sy, sz);
