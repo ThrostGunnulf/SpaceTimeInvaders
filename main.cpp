@@ -382,7 +382,20 @@ void Timer(int value)
                 continue;
 
             if(enemyLasers[i]->y < ENEMY_LASER_FLOOR)
+            {
                 destroyLaser(i);
+                continue;
+            }
+
+            if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
+            {
+                playerLives--;
+                std::cout << "PLAYER MORREU! FICOU COM " << playerLives << " vidas.\nCenas" << enemyLasers[i]->model->y1 << "\n" << enemyLasers[i]->model->y2 << "\n";
+                destroyLaser(i);
+                player->x = 0;
+                if(playerLives < 0)
+                    gameLive = false;
+            }
 
             for(int j = 0; j < NUM_BUNKERS; j++)
             {
@@ -391,16 +404,6 @@ void Timer(int value)
                     destroyLaser(i);
                     break;
                 }
-            }
-
-            if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
-            {
-                playerLives--;
-                std::cout << "PLAYER MORREU! FICOU COM " << playerLives << " vidas.\n";
-                destroyLaser(i);
-                player->x = 0;
-                if(playerLives < 0)
-                    gameLive = false;
             }
         }
         //printf("\n");
@@ -428,15 +431,11 @@ void Timer(int value)
         if(liveShots < NUM_LASERS && rng < SHOT_FREQUENCY_MIN)
         {
             int i;
-            for(i = 0; i < NUM_LASERS; i++)
-            {
-                if(enemyLasers[i] == NULL)
-                    break;
-            }
+            for(i = 0; i < NUM_LASERS && enemyLasers[i]; i++);
 
             if(i < NUM_LASERS)
             {
-                GLfloat* laserPosition = new GLfloat[3];
+                GLfloat laserPosition[] = {0.0, 0.0, 0.0};
 
                 getRandomEnemy(laserPosition);
 
@@ -524,7 +523,6 @@ int main(int argc, char** argv)
     glutMotionFunc(mouseDragEvent);
 
     glutTimerFunc(msec, Timer, 0);
-
     glutMainLoop();
 
     destroyObjects();
