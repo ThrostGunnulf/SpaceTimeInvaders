@@ -16,7 +16,7 @@
 #define CAMERA_ROTATION_SPEED 100.0
 
 #define NUM_BUNKERS 3
-#define NUM_LASERS 5
+#define NUM_LASERS 3
 #define SHOT_FREQUENCY_MAX 10000000
 #define SHOT_FREQUENCY_MIN 100000
 
@@ -58,7 +58,8 @@ void getRandomEnemy(GLfloat*);
 GLfloat r;
 int score = 0;
 GLint fps = 60;
-GLfloat msec = 1.0/fps;
+GLfloat msec = 3.0; //1.0/fps;
+bool paused = false;
 bool isOrthoProj = false;
 GLfloat obsP[] = {0.0, 50.0, 150.0};
 GLfloat defaultObsP[] = {0.0, 75.0, 150.0};
@@ -177,6 +178,68 @@ void drawHUD()
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
+}
+
+GLuint pauseTexId = -1;
+void drawPauseHUD()
+{
+    //Clear buffer
+    glViewport(0, 0, screenWidth, screenHeight);
+
+    //Projection
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, screenWidth, 0, screenHeight, -zC, zC);
+
+    //View
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    //Load loading texture
+    if(pauseTexId == (GLuint) -1)
+    {
+        RgbImage imag;
+
+        glGenTextures(1, &pauseTexId);
+        glBindTexture(GL_TEXTURE_2D, pauseTexId);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+        imag.LoadBmpFile(("models"+ DIRSYMBOL + "pause.bmp").c_str());
+        glTexImage2D(GL_TEXTURE_2D, 0, 3,
+                     imag.GetNumCols(),
+                     imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+                     imag.ImageData());
+    }
+
+    glBindTexture(GL_TEXTURE_2D, pauseTexId);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+
+    glEnable(GL_BLEND);
+    glColor4f(1.0, 1.0, 1.0, 0.5);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    //Draw pause texture
+    glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 1);
+    glVertex3f(0, screenHeight, 0);
+    glTexCoord2f(0, 0);
+    glVertex3f(0, 0, 0);
+    glTexCoord2f(1, 0);
+    glVertex3f(screenWidth, 0, 0);
+    glTexCoord2f(1, 1);
+    glVertex3f(screenWidth, screenHeight, 0);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+
+    glEnable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
 }
 
 void drawLoading(void)
@@ -313,6 +376,12 @@ void getRandomEnemy(GLfloat* coords)
 
 void keyOperations(void)
 {
+    if(!paused && (keyState['p'] || keyState['P']))
+    {
+        paused = true;
+        keyState['p'] = keyState['P'] = false;
+    }
+
     if(keyState[' '] && playerBullet == NULL) //SPACEBAR
     {
         Model* bulletModel = modelsManager->getModel("t1playermissile");
@@ -366,6 +435,18 @@ void destroyLaser(int laserIndex)
 
 void Timer(int value)
 {
+    if(paused)
+    {
+        if(keyState['p'] || keyState['P'])
+        {
+            paused = false;
+            keyState['p'] = keyState['P'] = false;
+        }
+
+        glutTimerFunc(msec, Timer, 0);
+        return;
+    }
+
     if(gameLive)
     {
         keyOperations();
@@ -620,6 +701,9 @@ void display(void)
         enemyManager->draw();
         drawSkyBox();
         drawHUD();
+
+        if(paused)
+            drawPauseHUD();
     }
 
     if(!gameLive)
@@ -627,7 +711,7 @@ void display(void)
 
     //Swap Buffers
     glutSwapBuffers();
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 void destroyObjects()

@@ -1,12 +1,14 @@
-caixa crate_1 GL_CLAMP GL_CLAMP 4 4 crate_1
-t1invader1 t1invader1 GL_REPEAT GL_REPEAT 10.955 7.967 t1invader1
-t1invader2 t1invader1 GL_REPEAT GL_REPEAT 7.948 7.948 t1invader2
-t1invader3 t1invader1 GL_REPEAT GL_REPEAT 11.911 7.941 t1invader3
-t1invader4 t1invader1 GL_REPEAT GL_REPEAT 15.995 6.964 t1invader4
-t1invaderlaser t1invader1 GL_REPEAT GL_REPEAT 2.996 5.996
+planet planet dec GL_REPEAT GL_REPEAT 1.174 1.174 planet
+caixa crate_1 mod GL_CLAMP GL_CLAMP 4 4 crate_1
+t1invader1 t1invader1 mod GL_REPEAT GL_REPEAT 10.955 7.967 t1invader1
+t1invader2 t1invader1 mod GL_REPEAT GL_REPEAT 7.948 7.948 t1invader1
+t1invader3 t1invader1 mod GL_REPEAT GL_REPEAT 11.911 7.941 t1invader1
+t1invader4 t1invader1 mod GL_REPEAT GL_REPEAT 15.995 6.964 t1invader1
+t1invaderlaser t1invader1 mod GL_REPEAT GL_REPEAT 2.996 5.996
 t1invaderlaser
-t1player t1invader1 GL_REPEAT GL_REPEAT 8.971 7.967
-t1player
-t1playermissile t1invader1 GL_REPEAT GL_REPEAT 2.996 4.996
-t1playermissile
-planet planet GLREPEAT GL_REPEAT 1.174 1.174 planet
+t1player t1invader1 mod GL_REPEAT GL_REPEAT 8.971 7.967
+t1invader1
+t1playermissile t1invader1 mod GL_REPEAT GL_REPEAT 2.996 4.996
+t1invader1
+background4 background4 dec GL_CLAMP GL_CLAMP 0 0 background4
+skybox background4 dec GL_REPEAT GL_REPEAT 0 0 background4

@@ -13,14 +13,14 @@ EnemyManager::EnemyManager(ModelsManager* _mm, GLint currY, GLfloat currS, GLflo
         for(int j=0; j < ENEMYCOLUMNS; j++)
         {
             if(i < 2)
-                _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader3"), j*20+dBetweenEnemies, (i*20+dBetweenEnemies) + currentY, 0);
-            else if(i < 4)
                 _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader1"), j*20+dBetweenEnemies, (i*20+dBetweenEnemies) + currentY, 0);
-            else
+            else if(i < 4)
                 _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader2"), j*20+dBetweenEnemies, (i*20+dBetweenEnemies) + currentY, 0);
+            else
+                _enemyMatrix[ENEMYCOLUMNS*i+j] = new Object(mm->getModel("t1invader3"), j*20+dBetweenEnemies, (i*20+dBetweenEnemies) + currentY, 0);
 
 
-            _enemyMatrix[ENEMYCOLUMNS*i+j]->setScale(1, 1, 10);
+            //_enemyMatrix[ENEMYCOLUMNS*i+j]->setScale(1, 1, 10);
             _enemyMatrix[ENEMYCOLUMNS*i+j]->setVelocity(currentSpeed, 0, 0);
         }
     }
