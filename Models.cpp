@@ -52,7 +52,6 @@ void Model::draw()
     glMaterialfv(GL_FRONT, GL_SPECULAR, material->Ks);
     glMaterialfv(GL_FRONT, GL_SHININESS, &material->Ns);
 
-    glColor3f(1.0, 0.0, 0.0);
     for(int i=0; i < numFaces; i++)
     {
         glBegin(GL_TRIANGLES);

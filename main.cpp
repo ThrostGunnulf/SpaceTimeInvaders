@@ -45,6 +45,7 @@ void drawScore(int, int);
 void destroyBullet();
 void destroyObjects();
 void drawHUD();
+void drawLives(int, int);
 void updateObsP();
 void moveEnemyShots();
 bool checkEnemyShotCollision(int);
@@ -68,6 +69,7 @@ bool gameLive = true;
 bool keyState[256] = {false};
 bool specialKeyState[256] = {false};
 
+Object* livesModel = NULL;
 int playerLives = 3;
 
 Object* player = NULL;
@@ -80,6 +82,21 @@ GLint liveShots = 0;
 ModelsManager* modelsManager = NULL;
 EnemyManager* enemyManager = NULL;
 DefenseBunker* bunkers[NUM_BUNKERS] = { NULL };
+
+
+void drawLives(int x, int y)
+{
+    livesModel->update(msec);
+
+    glColor3f(1.0, 1.0, 1.0);
+
+    char lives[20], *aux=lives;
+    sprintf(lives, "x%d", playerLives);
+
+    glRasterPos2f(x, y);
+    while (*aux)
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
+}
 
 void drawScore(int x, int y)
 {
@@ -154,6 +171,7 @@ void drawHUD()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    drawLives(960 + livesModel->model->width/2, 50);
     drawScore(40, 50);
 
     glEnable(GL_CULL_FACE);
@@ -297,6 +315,9 @@ void Timer(int value)
                 playerLives--;
                 std::cout << "PLAYER MORREU! FICOU COM " << playerLives << " vidas.\n";
                 destroyLaser(i);
+                player->x = 0;
+                if(playerLives < 0)
+                    gameLive = false;
             }
         }
         //printf("\n");
@@ -360,6 +381,7 @@ void Timer(int value)
     {
         keyState[' '] = false;
 
+        playerLives = 3;
         gameLive = true;
         if(playerBullet != NULL)
         {
@@ -468,6 +490,9 @@ void init(void)
     planet->setRotation(0.05, 0, 1, 0);
     space = new Object(modelsManager->getModel("skybox"), 0, 0, 0);
     space->setScale(1250, 1250, 1250);
+
+    livesModel = new Object(modelsManager->getModel("t1player"), 950, 50, 0);
+    livesModel->setScale(2, -2, 2);
 
     bunkers[0] = new DefenseBunker(-85, 30, 0, 3, 3, 12);
     bunkers[1] = new DefenseBunker(0, 30, 0, 3, 3, 12);
