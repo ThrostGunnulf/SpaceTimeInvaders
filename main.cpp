@@ -210,6 +210,34 @@ void drawGameover()
     glEnable(GL_LIGHTING);
 }
 
+void generateLaserColor(GLfloat* array)
+{
+   int rng = rand() % 9;
+
+   if(rng < 3)
+   {
+       array[0] = 255;
+       array[1] = 0;
+       array[2] = 0;
+       array[3] = 1;
+   }
+   else if(rng >= 3 && rng < 6)
+   {
+       array[0] = 0;
+       array[1] = 255;
+       array[2] = 0;
+       array[3] = 1;
+   }
+   else
+   {
+       array[0] = 0;
+       array[1] = 0;
+       array[2] = 255;
+       array[3] = 1;
+   }
+}
+
+
 void getRandomEnemy(GLfloat* coords)
 {
     bool found = false;
@@ -360,10 +388,13 @@ void Timer(int value)
                 printf("NOVO LASER %d\n", i);
                 enemyLasers[i] = new Object(modelsManager->getModel("t1invaderlaser"), laserPosition[0], laserPosition[1], laserPosition[2]);
                 enemyLasers[i]->setVelocity(0, -1, 0);
+                enemyLasers[i]->setRotation(10, 0, 1, 0);
                 liveShots++;
 
                 glEnable(firstEnemyLight+i);
-                GLfloat enemyLaserIntensity[4] = {255, 0, 0, 1};
+                GLfloat enemyLaserIntensity[4];
+                generateLaserColor(enemyLaserIntensity);
+
                 GLfloat enemyLightPos[4] = {enemyLasers[i]->x, enemyLasers[i]->y, enemyLasers[i]->z, 1.0};
                 glLightfv(firstEnemyLight+i,GL_POSITION,				enemyLightPos);
                 glLightfv(firstEnemyLight+i,GL_AMBIENT,					enemyLaserIntensity);
