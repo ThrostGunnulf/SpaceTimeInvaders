@@ -591,10 +591,8 @@ void Timer(int value)
         }
     }
 
-    if(!gameLive && keyState[' '])
+    if(!gameLive && keyState['r'])
     {
-        keyState[' '] = false;
-
         playerLives = 3;
         gameLive = true;
         if(playerBullet != NULL)
