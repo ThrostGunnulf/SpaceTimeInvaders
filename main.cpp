@@ -21,8 +21,9 @@
 #define SHOT_FREQUENCY_MAX 10000000
 #define SHOT_FREQUENCY_MIN 100000
 
-#define PLAYER_LASER_CEILING 215
-#define ENEMY_LASER_FLOOR -100
+#define PLAYER_LASER_CEILING 250
+#define ENEMY_LASER_FLOOR -75
+#define ENEMY_STARTING_HEIGHT 135
 
 #define LEFT_LIMIT -150
 #define RIGHT_LIMIT 150
@@ -53,6 +54,7 @@ void moveEnemyShots();
 bool checkEnemyShotCollision(int);
 void destroyLaser(int);
 void getRandomEnemy(GLfloat*);
+void initFog(void);
 
 ////
 // Global variables.
@@ -62,8 +64,8 @@ GLint fps = 60;
 GLfloat msec = 3.0; //1.0/fps;
 bool paused = false;
 bool isOrthoProj = false;
-GLfloat obsP[] = {0.0, 50.0, 150.0};
-GLfloat defaultObsP[] = {0.0, 75.0, 150.0};
+GLfloat obsP[] = {0.0, 115.0, 150.0};
+GLfloat defaultObsP[] = {0.0, 115.0, 150.0};
 GLfloat playerHorizontalMovement = 2.0;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
@@ -115,10 +117,10 @@ void drawScore(int x, int y)
 
 void drawSkyBox(void)
 {
-    glDisable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
     space->setRotation(-0.01, 1, 1, 0);
     space->update(msec);
-    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
 }
 
 void drawObjects(void)
@@ -380,6 +382,17 @@ void drawGameover()
     glDisable(GL_TEXTURE_2D);
 }
 
+void initFog(void)
+{
+    GLfloat fogColor[] = {0.55, 0.55, 0.55, 1.0};
+    glFogfv(GL_FOG_COLOR,fogColor);
+    glFogi(GL_FOG_MODE, GL_EXP2);
+    glFogf(GL_FOG_START, 1);
+    glFogf(GL_FOG_END, 50);
+    glFogf (GL_FOG_DENSITY, 0.0006);
+    glEnable(GL_FOG);
+}
+
 void generateLaserColor(GLfloat* array)
 {
    int rng = rand() % 9;
@@ -603,7 +616,7 @@ void Timer(int value)
 
         if(enemyManager != NULL)
             delete enemyManager;
-        enemyManager = new EnemyManager(modelsManager, 100, 0.25, 20);
+        enemyManager = new EnemyManager(modelsManager, ENEMY_STARTING_HEIGHT, 0.25, 20);
         if(player != NULL)
             delete player;
         player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
@@ -678,6 +691,7 @@ void init(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_NORMALIZE);
     //glEnable(GL_LIGHT0);
+    initFog();
 
     glEnable(GL_LIGHT2);
     GLfloat intensidadeCor[4] = {0.2, 0.2, 0.2, 1.0};
@@ -696,15 +710,15 @@ void init(void)
 
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-    enemyManager = new EnemyManager(modelsManager, 100, 0.25, 20);
+    enemyManager = new EnemyManager(modelsManager, ENEMY_STARTING_HEIGHT, 0.25, 20);
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(1, 1, 1);
     planet = new Object(modelsManager->getModel("planet"), 275, -200, -575);
     planet->setScale(50, 50, 50);
     planet->setRotation(0.05, 0, 1, 0);
-    space = new Object(modelsManager->getModel("skybox"), 0, 0, 0);
-    space->setScale(1250, 1250, 1250);
+    space = new Object(modelsManager->getModel("spacesphere"), defaultObsP[0], defaultObsP[1], defaultObsP[2]);
+    space->setScale(200, 200, 200);
 
     livesModel = new Object(modelsManager->getModel("t1player"), 950, 50, 0);
     livesModel->setScale(2, -2, 2);
