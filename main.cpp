@@ -81,7 +81,7 @@ bool flashlightOn = true;
 Object* player = NULL;
 Object* playerBullet = NULL;
 Object* planet = NULL;
-Object* sun = NULL;
+Object* moon = NULL;
 Object* space = NULL;
 Object* enemyLasers[NUM_LASERS] = { NULL };
 unsigned int firstEnemyLight = GL_LIGHT5;
@@ -161,7 +161,7 @@ void drawObjects(void)
     }
 
     planet->update(msec);
-    sun->update(msec);
+    moon->update(msec);
 
     for(int i = 0; i < NUM_BUNKERS; i++)
         bunkers[i]->update(msec);
@@ -709,33 +709,16 @@ void init(void)
 
     initFog();
 
-    //Sun light
-    //glEnable(GL_LIGHT2);
-    GLfloat intensidadeCor[4] = {0.8, 0.8, 0.8, 1.0};
-    GLfloat direccao[] = {275, -200, -575, 1};
-    GLfloat posicaoLuz[] = {220, -200, -575, 1};
-    glLightfv(GL_LIGHT2,GL_POSITION,				posicaoLuz);
-    glLightfv(GL_LIGHT2,GL_AMBIENT,					intensidadeCor);
-    glLightfv(GL_LIGHT2,GL_DIFFUSE,					intensidadeCor);
-    glLightfv(GL_LIGHT2,GL_SPECULAR,				intensidadeCor);
-    glLightf(GL_LIGHT2,GL_CONSTANT_ATTENUATION,	    1.0);
-    //glLightf(GL_LIGHT2,GL_LINEAR_ATTENUATION,		0.5);
-    //glLightf(GL_LIGHT2,GL_QUADRATIC_ATTENUATION,	0.5);
-    //glLightf(GL_LIGHT2,GL_SPOT_CUTOFF,				90);
-    //glLightfv(GL_LIGHT2,GL_SPOT_DIRECTION,			direccao);
-    //glLightf(GL_LIGHT2,GL_SPOT_EXPONENT,			64.0);
-
-
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
     enemyManager = new EnemyManager(modelsManager, ENEMY_STARTING_HEIGHT, 0.25, 20);
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
-    //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(1, 1, 1);
     planet = new Object(modelsManager->getModel("planet"), 275, -200, -575);
     planet->setScale(50, 50, 50);
-    planet->setRotation(0.05, 0, 1, 0);
-    sun = new Object(modelsManager->getModel("sun"), -925, 155, -950);
-    sun->setScale(8, 8, 8);
+    planet->setRotation(0.025, 0, 1, 0);
+    moon = new Object(modelsManager->getModel("moon"), -327, 452, 150);
+    moon->setScale(5, 5, 5);
+    moon->setRotation(0.05, 0, 1, 1);
     space = new Object(modelsManager->getModel("spacesphere"), defaultObsP[0], defaultObsP[1], defaultObsP[2]);
     space->setScale(200, 200, 200);
 
@@ -797,8 +780,22 @@ void destroyObjects()
 {
     delete player;
     delete playerBullet;
+    delete moon;
+    delete planet;
+    delete livesModel;
     delete modelsManager;
     delete enemyManager;
+
+    if(playerBullet != NULL)
+        delete playerBullet;
+
+    for(int i = 0; i < NUM_BUNKERS; i++)
+        delete bunkers[i];
+    for(int i = 0; i < NUM_LASERS; i++)
+    {
+        if(enemyLasers[i] != NULL)
+            delete enemyLasers[i];
+    }
 }
 
 ////

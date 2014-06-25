@@ -1,0 +1,11 @@
+# Blender MTL File: 'Planet.blend'
+# Material Count: 1
+
+newmtl 01_-_Default
+Ns 200.0
+Ka 0.300000 0.300000 0.300000
+Kd 0.800000 0.800000 0.800000
+Ks 0.400000 0.400000 0.400000
+Ni 1.500000
+d 1.000000
+illum 2
