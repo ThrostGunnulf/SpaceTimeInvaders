@@ -76,10 +76,12 @@ bool specialKeyState[256] = {false};
 
 Object* livesModel = NULL;
 int playerLives = 3;
+bool flashlightOn = true;
 
 Object* player = NULL;
 Object* playerBullet = NULL;
 Object* planet = NULL;
+Object* sun = NULL;
 Object* space = NULL;
 Object* enemyLasers[NUM_LASERS] = { NULL };
 unsigned int firstEnemyLight = GL_LIGHT5;
@@ -128,8 +130,11 @@ void drawObjects(void)
     player->update(msec);
 
     //Spotlight that comes from the player
-    glEnable(GL_LIGHT1);
-    GLfloat intensidadeCor[4] = {0.4, 0.4, 0.4, 1.0};
+    if(flashlightOn)
+        glEnable(GL_LIGHT1);
+    else
+        glDisable(GL_LIGHT1);
+    GLfloat intensidadeCor[4] = {0.8, 0.8, 0.8, 1.0};
     GLfloat direccao[] = {0, 1, 0, 0};
     GLfloat posicaoLuz[] = {0, 0, 0, 1};
     posicaoLuz[0] = player->x;
@@ -156,6 +161,7 @@ void drawObjects(void)
     }
 
     planet->update(msec);
+    sun->update(msec);
 
     for(int i = 0; i < NUM_BUNKERS; i++)
         bunkers[i]->update(msec);
@@ -384,12 +390,12 @@ void drawGameover()
 
 void initFog(void)
 {
-    GLfloat fogColor[] = {0.55, 0.55, 0.55, 1.0};
+    GLfloat fogColor[] = {0.3, 0.3, 0.3, 1.0};
     glFogfv(GL_FOG_COLOR,fogColor);
     glFogi(GL_FOG_MODE, GL_EXP2);
     glFogf(GL_FOG_START, 1);
     glFogf(GL_FOG_END, 50);
-    glFogf (GL_FOG_DENSITY, 0.0006);
+    glFogf (GL_FOG_DENSITY, 0.0005);
     glEnable(GL_FOG);
 }
 
@@ -445,6 +451,12 @@ void keyOperations(void)
     {
         paused = true;
         keyState['p'] = keyState['P'] = false;
+    }
+
+    if(keyState['f'] || keyState['F'])
+    {
+        flashlightOn = !flashlightOn;
+        keyState['f'] = keyState['F'] = false;
     }
 
     if(keyState[' '] && playerBullet == NULL) //SPACEBAR
@@ -510,6 +522,7 @@ void Timer(int value)
         glutTimerFunc(msec, Timer, 0);
         return;
     }
+
 
     if(gameLive)
     {
@@ -690,23 +703,27 @@ void init(void)
 
     glEnable(GL_LIGHTING);
     glEnable(GL_NORMALIZE);
-    //glEnable(GL_LIGHT0);
+
+    GLfloat ambientLight[] = {0.6, 0.6, 0.6, 1.0};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);
+
     initFog();
 
-    glEnable(GL_LIGHT2);
-    GLfloat intensidadeCor[4] = {0.2, 0.2, 0.2, 1.0};
-    GLfloat direccao[] = {0, 5, -10, 0};
-    GLfloat posicaoLuz[] = {0, 5, 3, 1};
+    //Sun light
+    //glEnable(GL_LIGHT2);
+    GLfloat intensidadeCor[4] = {0.8, 0.8, 0.8, 1.0};
+    GLfloat direccao[] = {275, -200, -575, 1};
+    GLfloat posicaoLuz[] = {220, -200, -575, 1};
     glLightfv(GL_LIGHT2,GL_POSITION,				posicaoLuz);
     glLightfv(GL_LIGHT2,GL_AMBIENT,					intensidadeCor);
     glLightfv(GL_LIGHT2,GL_DIFFUSE,					intensidadeCor);
     glLightfv(GL_LIGHT2,GL_SPECULAR,				intensidadeCor);
     glLightf(GL_LIGHT2,GL_CONSTANT_ATTENUATION,	    1.0);
-    glLightf(GL_LIGHT2,GL_LINEAR_ATTENUATION,		0.0);
-    glLightf(GL_LIGHT2,GL_QUADRATIC_ATTENUATION,	0.0);
-    glLightf(GL_LIGHT2,GL_SPOT_CUTOFF,				16);
-    glLightfv(GL_LIGHT2,GL_SPOT_DIRECTION,			direccao);
-    glLightf(GL_LIGHT2,GL_SPOT_EXPONENT,			32.0);
+    //glLightf(GL_LIGHT2,GL_LINEAR_ATTENUATION,		0.5);
+    //glLightf(GL_LIGHT2,GL_QUADRATIC_ATTENUATION,	0.5);
+    //glLightf(GL_LIGHT2,GL_SPOT_CUTOFF,				90);
+    //glLightfv(GL_LIGHT2,GL_SPOT_DIRECTION,			direccao);
+    //glLightf(GL_LIGHT2,GL_SPOT_EXPONENT,			64.0);
 
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
@@ -717,6 +734,8 @@ void init(void)
     planet = new Object(modelsManager->getModel("planet"), 275, -200, -575);
     planet->setScale(50, 50, 50);
     planet->setRotation(0.05, 0, 1, 0);
+    sun = new Object(modelsManager->getModel("sun"), -925, 155, -950);
+    sun->setScale(8, 8, 8);
     space = new Object(modelsManager->getModel("spacesphere"), defaultObsP[0], defaultObsP[1], defaultObsP[2]);
     space->setScale(200, 200, 200);
 
