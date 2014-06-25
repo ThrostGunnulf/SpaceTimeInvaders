@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{hyperref}
+
+\newcommand*{\titleGM}{\begingroup % Create the command for including the title page in the document
+\hbox{ % Horizontal box
+\hspace*{0.2\textwidth} % Whitespace to the left of the title page
+\rule{1pt}{\textheight} % Vertical line
+\hspace*{0.05\textwidth} % Whitespace between the vertical line and title page text
+\parbox[b]{0.75\textwidth}{ % Paragraph box which restricts text to less than the width of the page
+
+{\noindent\Huge\bfseries SpaceTime Invaders }\\[2\baselineskip] % Title
+{\large \textit{Computação Gráfica}}\\[4\baselineskip] % Tagline or further description
+{\Large \textsc{João Oliveira  - 2010129856}} \\ \\ % Author name
+{\Large \textsc{Joaquim Mendes - 2011133854}} % Author name
+
+\vspace{0.5\textheight} % Whitespace between the title block and the publisher
+{\noindent FCTUC - Departamento de Engenharia Informática}\\[\baselineskip] % Publisher and logo
+}}
+\endgroup}
+\begin{document}
+
+\titleGM
+
+%Quanto ao relatorio, este deve ser SUCINTO!
+%Espera-se uma ou duas páginas com os aspectos essencias. 
+% - qual o objectivo do projecto
+% - que aspectos relativos a CG foram implementados 
+% - como foram implementados
+%- quais as mais valias/contribuições fundamentais do projecto
+\section{Introdução}
+ O objectivo deste projecto é aprofundar os conhecimentos adquiridos ao longo do semestre na cadeira de Computação Gráfica, englobando num só programa um conjunto de técnicas e tecnologias trabalhadas em separado. O projecto em si possui dois grandes requisitos, usar \textit{openGL} e ter um robô capaz de disparar tiros.
+ 
+ Como linguagem de programação escolhemos o \textit{C++}, para poder usufruir de todos os benefícios de programação orientada a objectos, mas poder na mesma usar a \textit{API} de \textit{openGL} com que nos fomos acostumando a trabalhar ao longo do semestre.
+ 
+ Na sua versão final, o nosso projecto tem as seguintes capacidades:
+ \begin{itemize}
+  \item Importar modelos a partir de ficheiros \textit{.obj};
+  \item Colisões entre objectos (apenas \textit{2D}, devido ao jogo implementado, que apesar de \textit{3D} apenas permite movimentações num plano);
+  \item Mapear texturas a modelos a partir de informação também contida em ficheiros \textit{.obj};
+  \item Interacção de luz com os diversos modelos na cena, cujos coeficientes dos diversos componentes do modelo de \textit{Phong} são lidos a partir de ficheiros \textit{.mtl};
+  \item Reutilização de modelos e texturas em diversos objectos presentes no ecrã, evitando replicação de informação;
+  \item Objectos construídos como uma malha de polígonos, sendo possível destruir partes desses objectos;
+  \item Ecrã inicialmente informando o utilizador que se está a proceder ao carregamento dos diversos componentes do programa para memória;
+  \item Menú de pausa semi-transparente;
+  \item Nevoeiro.
+ \end{itemize}
+ 
+ Foram utilizados diversos modelos e texturas \textit{open source} obtidos do website \url{http://tf3dm.com/}
+
+\newpage
+\section{Detalhes de Implementação}
+ \subsection{Importar Modelos e Mapear Texturas}
+  Implementámos uma classe chamada \textit{ModelManager} que se encarrega de carregar todos os modelos e texturas para memória, guardando-os em \textit{hashmaps}. Isto permite que, para diversos objectos que utilizem o mesmo modelo ou textura, não seja necessário carregar os modelos e texturas de novo. Ficam também estes acessíveis a qualquer objecto que os use a partir dos seus nomes.
+ 
+ \subsection{Colisões}
+  Visto que o nosso jogo, apesar de \textit{3D}, apenas se passa num plano, as colisões que implementámos foram \textit{2D}. Isto permitiu-nos simplificar bastante o código correspondente, apesar de o termos feito de forma a ser escalável para mais dimensões.
+  
+  Para cada objecto temos uma \textit{bounding box}, o que transforma o problema das colisões num problema de intersecção de quadrados. Quando é detectada uma colisão, temos apenas de destruir o projéctil e o objecto atingido.
+ 
+ \subsection{Malha de Polígonos}
+  Existem no nosso projecto alguns objectos que são constituídos por partes que podem ser destruídas independentemente. Para que tal seja possível, os objectos são divididos em diversos polígonos tanto no eixo das abcissas como no eixo das ordenadas (não no eixo das cotas, visto que o jogo se passar no plano \textit{X0Y}).
+  
+  Desta forma, as colisões com partes do objecto são idênticas às entre objectos normais, sendo depois removidas as partes que já foram destruídas. Através de uma matriz bidimensional, mantemos a informação de que partes se encontram intactas, permitindo desenhar apenas as partes que ainda não foram destruídas.
+  
+  Por uma questão de eficiência, quando partes adjacentes do objecto estão intactas, não são desenhadas as faces que seriam invisíveis por estarem adjacentes a outras partes. Estas apenas são desenhadas quando uma face necessita de ser visível para que o objecto esteja bem desenhado.
+ 
+ \subsection{Ecrã de \textit{Loading}}
+  Imediatamente após a inicialização das configurações do \textit{openGL}, é desenhado no ecrã um quadrado com as dimensões deste, sendo-lhe aplicada uma textura que indica ao utilizador que o programa está a carregar. Após carregar tudo o que é necessário, procede-se normalmente com o programa.
+
+\end{document}
+
