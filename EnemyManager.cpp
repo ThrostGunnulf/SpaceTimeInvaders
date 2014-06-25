@@ -140,7 +140,6 @@ void EnemyManager::move()
             }
         }
     }
-    printf("OMG VELOCIDADE = %f\n", (0.25 + (ENEMYCOLUMNS*ENEMYLINES - liveEnemies) * 0.1)*-1);
 }
 
 

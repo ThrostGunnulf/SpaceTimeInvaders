@@ -13,16 +13,16 @@
 #include "DefenseBunker.hxx"
 
 #define ZOOM_SPEED 1.2
+#define ZOOM_LIMIT 1000
 #define CAMERA_ROTATION_SPEED 100.0
 
 #define NUM_BUNKERS 3
 #define NUM_LASERS 3
 #define SHOT_FREQUENCY_MAX 10000000
-#define SHOT_FREQUENCY_MIN 1000
+#define SHOT_FREQUENCY_MIN 100000
 
-#define PLAYER_LASER_CEILING 250
-#define ENEMY_LASER_FLOOR -75
-#define ENEMY_STARTING_HEIGHT 135
+#define PLAYER_LASER_CEILING 215
+#define ENEMY_LASER_FLOOR -100
 
 #define LEFT_LIMIT -150
 #define RIGHT_LIMIT 150
@@ -62,8 +62,8 @@ GLint fps = 60;
 GLfloat msec = 3.0; //1.0/fps;
 bool paused = false;
 bool isOrthoProj = false;
-GLfloat obsP[] = {0.0, 115.0, 150.0};
-GLfloat defaultObsP[] = {0.0, 115.0, 150.0};
+GLfloat obsP[] = {0.0, 50.0, 150.0};
+GLfloat defaultObsP[] = {0.0, 75.0, 150.0};
 GLfloat playerHorizontalMovement = 2.0;
 GLfloat xC = 100.0, yC = 100.0, zC = 200.0;
 GLint screenWidth = 1024, screenHeight = 768;
@@ -124,6 +124,27 @@ void drawSkyBox(void)
 void drawObjects(void)
 {
     player->update(msec);
+
+    //Spotlight that comes from the player
+    glEnable(GL_LIGHT1);
+    GLfloat intensidadeCor[4] = {0.4, 0.4, 0.4, 1.0};
+    GLfloat direccao[] = {0, 1, 0, 0};
+    GLfloat posicaoLuz[] = {0, 0, 0, 1};
+    posicaoLuz[0] = player->x;
+    posicaoLuz[1] = player->y;
+    posicaoLuz[2] = player->z;
+
+    glLightfv(GL_LIGHT1,GL_POSITION,				posicaoLuz);
+    glLightfv(GL_LIGHT1,GL_AMBIENT,					intensidadeCor);
+    glLightfv(GL_LIGHT1,GL_DIFFUSE,					intensidadeCor);
+    glLightfv(GL_LIGHT1,GL_SPECULAR,				intensidadeCor);
+    glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION,	    1.0);
+    glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION,		0.0);
+    glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,	0.0);
+    glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,				16);
+    glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,			direccao);
+    glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,			32.0);
+
     if(playerBullet)
     {
         GLfloat bulletLightPos[4] = {playerBullet->x, playerBullet->y, playerBullet->z + 15, 1.0};
@@ -297,36 +318,66 @@ void drawLoading(void)
     glutPostRedisplay();
 }
 
+GLuint gameoverTexId = -1;
 void drawGameover()
 {
-    glDisable(GL_LIGHTING);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    //Clear buffer
+    glViewport(0, 0, screenWidth, screenHeight);
 
+    //Projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0, screenWidth, screenHeight, 0.0, -1.0, 10.0);
+    glOrtho(0, screenWidth, 0, screenHeight, -zC, zC);
 
+    //View
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    char gameoverStr[100], *aux = gameoverStr;
+    //Load gameOver texture
+    if(gameoverTexId == (GLuint) -1)
+    {
+        RgbImage imag;
 
-    sprintf(gameoverStr, "GAME OVER!");
+        glGenTextures(1, &gameoverTexId);
+        glBindTexture(GL_TEXTURE_2D, gameoverTexId);
 
-    glColor3f(255, 255, 255);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    glRasterPos2f(screenWidth/2 - 95, screenHeight/2);
-    while (*aux)
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-    sprintf(gameoverStr, "(hit Space to retry)");
-    aux = gameoverStr;
-    glRasterPos2f(screenWidth/2 - 100, screenHeight/2 + 20);
-    while (*aux)
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *(aux++));
+        imag.LoadBmpFile(("models"+ DIRSYMBOL + "gameover.bmp").c_str());
+        glTexImage2D(GL_TEXTURE_2D, 0, 3,
+                     imag.GetNumCols(),
+                     imag.GetNumRows(), 0, GL_RGB, GL_UNSIGNED_BYTE,
+                     imag.ImageData());
+    }
 
-    glEnable(GL_CULL_FACE);
+    glBindTexture(GL_TEXTURE_2D, gameoverTexId);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+
+    glEnable(GL_BLEND);
+    glColor4f(1.0, 1.0, 1.0, 0.5);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    //Draw pause texture
+    glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 1);
+    glVertex3f(0, screenHeight, 0);
+    glTexCoord2f(0, 0);
+    glVertex3f(0, 0, 0);
+    glTexCoord2f(1, 0);
+    glVertex3f(screenWidth, 0, 0);
+    glTexCoord2f(1, 1);
+    glVertex3f(screenWidth, screenHeight, 0);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+
     glEnable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
 }
 
 void generateLaserColor(GLfloat* array)
@@ -430,7 +481,6 @@ void destroyLaser(int laserIndex)
     delete enemyLasers[laserIndex];
     enemyLasers[laserIndex] = NULL;
     liveShots--;
-    printf("LASER %d DESTRUIDO\n", laserIndex);
 }
 
 
@@ -477,14 +527,12 @@ void Timer(int value)
             if(enemyLasers[i] != NULL && player->checkCollision(enemyLasers[i]))
             {
                 playerLives--;
-                std::cout << "PLAYER MORREU! FICOU COM " << playerLives << " vidas.\nCenas" << enemyLasers[i]->y1 << "\n" << enemyLasers[i]->y2 << "\n";
                 destroyLaser(i);
                 player->x = 0;
                 if(playerLives < 0)
                     gameLive = false;
             }
         }
-        //printf("\n");
 
         if(playerBullet != NULL)
         {
@@ -521,7 +569,6 @@ void Timer(int value)
 
                 getRandomEnemy(laserPosition);
 
-                printf("NOVO LASER %d\n", i);
                 enemyLasers[i] = new Object(modelsManager->getModel("t1invaderlaser"), laserPosition[0], laserPosition[1], laserPosition[2]);
                 enemyLasers[i]->setVelocity(0, -1, 0);
                 enemyLasers[i]->setRotation(10, 0, 1, 0);
@@ -558,7 +605,7 @@ void Timer(int value)
 
         if(enemyManager != NULL)
             delete enemyManager;
-        enemyManager = new EnemyManager(modelsManager, ENEMY_STARTING_HEIGHT, 0.25, 20);
+        enemyManager = new EnemyManager(modelsManager, 100, 0.25, 20);
         if(player != NULL)
             delete player;
         player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
@@ -634,24 +681,24 @@ void init(void)
     glEnable(GL_NORMALIZE);
     //glEnable(GL_LIGHT0);
 
-    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT2);
     GLfloat intensidadeCor[4] = {0.2, 0.2, 0.2, 1.0};
     GLfloat direccao[] = {0, 5, -10, 0};
     GLfloat posicaoLuz[] = {0, 5, 3, 1};
-    glLightfv(GL_LIGHT1,GL_POSITION,				posicaoLuz);
-    glLightfv(GL_LIGHT1,GL_AMBIENT,					intensidadeCor);
-    glLightfv(GL_LIGHT1,GL_DIFFUSE,					intensidadeCor);
-    glLightfv(GL_LIGHT1,GL_SPECULAR,				intensidadeCor);
-    glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION,	    1.0);
-    glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION,		0.0);
-    glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,	0.0);
-    glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,				16);
-    glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,			direccao);
-    glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,			32.0);
+    glLightfv(GL_LIGHT2,GL_POSITION,				posicaoLuz);
+    glLightfv(GL_LIGHT2,GL_AMBIENT,					intensidadeCor);
+    glLightfv(GL_LIGHT2,GL_DIFFUSE,					intensidadeCor);
+    glLightfv(GL_LIGHT2,GL_SPECULAR,				intensidadeCor);
+    glLightf(GL_LIGHT2,GL_CONSTANT_ATTENUATION,	    1.0);
+    glLightf(GL_LIGHT2,GL_LINEAR_ATTENUATION,		0.0);
+    glLightf(GL_LIGHT2,GL_QUADRATIC_ATTENUATION,	0.0);
+    glLightf(GL_LIGHT2,GL_SPOT_CUTOFF,				16);
+    glLightfv(GL_LIGHT2,GL_SPOT_DIRECTION,			direccao);
+    glLightf(GL_LIGHT2,GL_SPOT_EXPONENT,			32.0);
 
 
     modelsManager = new ModelsManager("models" + DIRSYMBOL, "models.config");
-    enemyManager = new EnemyManager(modelsManager, ENEMY_STARTING_HEIGHT, 0.25, 20);
+    enemyManager = new EnemyManager(modelsManager, 100, 0.25, 20);
     player = new Object(modelsManager->getModel("t1player"), 0, 0, 0);
     //player->setVelocity(0.1, 0.1, 0.1);
     player->setScale(1, 1, 1);
@@ -722,7 +769,6 @@ void destroyObjects()
     delete modelsManager;
     delete enemyManager;
 }
-
 
 ////
 // GLUT input events handlers
@@ -806,7 +852,7 @@ void mouseClickEvent(int button, int state, int x, int y)
         r /= ZOOM_SPEED;
         updateObsP();
     }
-    else if(button == 4 && r < 1230) //Scroll wheel backwards
+    else if(button == 4 && r < ZOOM_LIMIT) //Scroll wheel backwards
     {
         if(state == GLUT_UP)
             return;

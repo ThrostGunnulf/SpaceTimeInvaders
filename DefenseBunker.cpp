@@ -37,6 +37,9 @@ void DefenseBunker::assignTexture(std::string dir, std::string name)
 
 void DefenseBunker::update(GLfloat delta)
 {
+    glEnable(GL_COLOR_MATERIAL);
+    glColor3f(1.0, 1.0, 1.0);
+
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texId);
 
@@ -184,6 +187,7 @@ void DefenseBunker::update(GLfloat delta)
 
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
+    glDisable(GL_COLOR_MATERIAL);
 }
 
 
